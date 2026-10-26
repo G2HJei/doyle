@@ -14,12 +14,12 @@ import java.util.UUID;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class PublishEventOutcomeServiceTest {
+class PublishEventOutcomeCommandProcessorTest {
 
     @Mock
-    EventOutcomeRepository     repository;
+    EventOutcomeRepository              repository;
     @InjectMocks
-    PublishEventOutcomeService service;
+    PublishEventOutcomeCommandProcessor service;
 
     PublishEventOutcomeCommand command = new PublishEventOutcomeCommand()
             .eventId(UUID.randomUUID())

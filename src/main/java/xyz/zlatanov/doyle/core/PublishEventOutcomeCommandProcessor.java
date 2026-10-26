@@ -8,7 +8,7 @@ import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import xyz.zlatanov.doyle.core.port.driving.PublishEventOutcomeUseCase;
 
 @RequiredArgsConstructor
-public class PublishEventOutcomeService implements PublishEventOutcomeUseCase {
+public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeUseCase {
 
     private final EventOutcomeRepository repository;
 
