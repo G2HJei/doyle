@@ -12,6 +12,7 @@ import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PublishEventOutcomeCommandProcessorTest {
@@ -29,15 +30,27 @@ class PublishEventOutcomeCommandProcessorTest {
     @Test
     void shouldPublishNewEventOutcome() {
         service.publish(command);
-        verify(repository).save(expectedOutcome(1));
+        verify(repository).save(eventOutcome(1));
     }
 
-    EventOutcome expectedOutcome(int expectedVersion) {
+    @Test
+    void shouldPublishUpdatedEventOutcome() {
+        when(repository.findOneByEventId(command.eventId()))
+                .thenReturn(eventOutcome(1, UUID.randomUUID()));
+        service.publish(command);
+        verify(repository).save(eventOutcome(2));
+    }
+
+    EventOutcome eventOutcome(int version) {
+        return eventOutcome(version, command.eventWinnerId());
+    }
+
+    EventOutcome eventOutcome(int version, UUID winnerId) {
         return new EventOutcome()
                 .eventId(command.eventId())
                 .eventName(command.eventName())
-                .eventWinnerId(command.eventWinnerId())
+                .eventWinnerId(winnerId)
                 .published(false)
-                .version(expectedVersion);
+                .version(version);
     }
 }
