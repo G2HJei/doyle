@@ -13,6 +13,6 @@ public class ConsumeEventOutcomeService implements ConsumeEventOutcomeUseCase {
     @Override
     public void consumeOutcome(EventOutcome outcome) {
         // todo repeated outcome triggers job each time! no-op in repo?
-        settlementJobRepository.create(outcome.eventId());
+        settlementJobRepository.create(outcome.eventId(), 0);
     }
 }

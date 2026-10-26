@@ -11,4 +11,5 @@ public class EventOutcome {
     private UUID   eventId;
     private String eventName;
     private UUID   eventWinnerId;
+    private int    version;
 }

@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface SettlementJobRepository {
 
-    void create(UUID eventId);
+    void create(UUID eventId, int eventVersion);
 }

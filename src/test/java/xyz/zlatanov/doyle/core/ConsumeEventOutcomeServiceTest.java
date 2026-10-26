@@ -21,12 +21,13 @@ class ConsumeEventOutcomeServiceTest {
     ConsumeEventOutcomeService service;
 
     EventOutcome outcome = new EventOutcome()
-            .eventId(UUID.randomUUID());
+            .eventId(UUID.randomUUID())
+            .version(-1);
 
     @Test
     void shouldCreateSettlementJob() {
         service.consumeOutcome(outcome);
-        verify(settlementJobRepository).create(outcome.eventId());
+        verify(settlementJobRepository).create(outcome.eventId(), outcome.version());
     }
 
 }
