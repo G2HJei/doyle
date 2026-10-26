@@ -8,14 +8,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.SettlementJob;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
+import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ConsumeEventOutcomeServiceTest {
 
+    @Mock
+    UUIDService                uuids;
     @Mock
     SettlementJobRepository    settlementJobRepository;
     @InjectMocks
@@ -25,12 +29,14 @@ class ConsumeEventOutcomeServiceTest {
             .eventId(UUID.randomUUID())
             .eventName("Test event")
             .eventWinnerId(UUID.randomUUID());
+    UUID          jobId         = UUID.randomUUID();
     SettlementJob settlementJob = new SettlementJob()
-            .id(UUID.randomUUID())
+            .id(jobId)
             .eventId(outcome.eventId());
 
     @Test
     void shouldCreateSettlementJob() {
+        when(uuids.get()).thenReturn(jobId);
         service.consumeOutcome(outcome);
         verify(settlementJobRepository).save(settlementJob);
     }
