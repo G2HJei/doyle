@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
 import java.util.UUID;
@@ -20,7 +20,7 @@ class ConsumeEventOutcomeServiceTest {
     @InjectMocks
     ConsumeEventOutcomeService service;
 
-    EventOutcome outcome = new EventOutcome()
+    EventOutcomeMessage outcome = new EventOutcomeMessage()
             .eventId(UUID.randomUUID())
             .version(-1);
 

@@ -29,4 +29,9 @@ class RelayEventOutcomesCommandProcessorTest {
         commandProcessor.relayOutcomes();
         verify(publisher, never()).publish(any());
     }
+
+    @Test
+    void shouldRelayUnpublished() {
+        //todo
+    }
 }

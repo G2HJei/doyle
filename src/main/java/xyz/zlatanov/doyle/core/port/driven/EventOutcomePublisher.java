@@ -1,7 +1,7 @@
 package xyz.zlatanov.doyle.core.port.driven;
 
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
 
 public interface EventOutcomePublisher {
-    void publish(EventOutcome outcome);
+    void publish(EventOutcomeMessage outcome);
 }
