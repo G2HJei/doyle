@@ -29,15 +29,17 @@ class PublishEventOutcomeServiceTest {
             .eventName("Victoria-Levski")
             .eventWinnerId(UUID.randomUUID());
 
-    EventOutcome outcome = new EventOutcome()
-            .eventId(command.eventId())
-            .eventName("Victoria-Levski")
-            .eventWinnerId(command.eventWinnerId())
-            .version(1);
-
     @Test
     void shouldPublishNewEventOutcome() {
         service.publish(command);
-        verify(publisher).publish(outcome);
+        verify(publisher).publish(expectedOutcome(1));
+    }
+
+    EventOutcome expectedOutcome(int expectedVersion) {
+        return new EventOutcome()
+                .eventId(command.eventId())
+                .eventName(command.eventName())
+                .eventWinnerId(command.eventWinnerId())
+                .version(expectedVersion);
     }
 }
