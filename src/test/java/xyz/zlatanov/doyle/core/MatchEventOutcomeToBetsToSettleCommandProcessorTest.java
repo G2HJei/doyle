@@ -32,13 +32,8 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
     @InjectMocks
     MatchEventOutcomeToBetsToSettleCommandProcessor commandProcessor;
 
-    SettlementJob settlementJob = new SettlementJob()
-            .eventId(UUID.randomUUID())
-            .outcomeVersion(1);
-    Bet           bet           = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(settlementJob.eventId())
-            .userId(UUID.randomUUID());
+    SettlementJob settlementJob = new SettlementJob().eventId(UUID.randomUUID());
+    Bet           bet           = getBet();
 
     @BeforeEach
     void setUp() {
@@ -69,6 +64,23 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
         betsToSettle(bet);
         commandProcessor.match();
         verifySettlementsPublished(bet);
+    }
+
+    @Test
+    void shouldPublishBetSettlementsForMultipleBets() {
+        val otherBet = getBet();
+        betsToSettle(bet, otherBet);
+
+        commandProcessor.match();
+
+        verifySettlementsPublished(bet, otherBet);
+    }
+
+    Bet getBet() {
+        return new Bet()
+                .id(UUID.randomUUID())
+                .eventId(settlementJob.eventId())
+                .userId(UUID.randomUUID());
     }
 
     void betsToSettle(Bet... bets) {
