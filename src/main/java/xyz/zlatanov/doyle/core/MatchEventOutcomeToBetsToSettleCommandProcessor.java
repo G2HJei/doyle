@@ -28,8 +28,11 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
             return;
         }
         val bets = getBetsToSettle(job);
-        settle(bets);
-        settlementJobRepository.markCompleted(job.id());
+        if (bets.isEmpty()) {
+            settlementJobRepository.markCompleted(job.id());
+        } else {
+            settle(bets);
+        }
     }
 
     private List<Bet> getBetsToSettle(SettlementJob job) {

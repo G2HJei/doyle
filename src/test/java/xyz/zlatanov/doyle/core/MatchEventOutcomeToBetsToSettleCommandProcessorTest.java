@@ -1,5 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
+import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +14,7 @@ import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementPublisher;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +40,11 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
             .eventId(settlementJob.eventId())
             .userId(UUID.randomUUID());
 
+    @BeforeEach
+    void setUp() {
+        when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
+    }
+
     @Test
     void shouldDoNothingWhenNoPendingJobs() {
         commandProcessor.match();
@@ -46,26 +53,40 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     @Test
     void shouldCompleteJobWhenNoBetsToSettle() {
-        when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
         commandProcessor.match();
-        verify(settlementJobRepository).markCompleted(settlementJob.id());
-    }
-
-    @Test
-    void shouldPublishBetSettlements() {
-        when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
-        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, 100)).thenReturn(List.of(bet));
-
-        commandProcessor.match();
-
-        verify(publisher).publish(new BetSettlementMessage().betId(bet.id()));
+        verifyJobCompleted(true);
     }
 
     @Test
     void shouldNotCompleteJobWhenBetsWereSettled() {
-        when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
-        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, 100)).thenReturn(List.of(bet));
+        betsToSettle(bet);
         commandProcessor.match();
-        verify(settlementJobRepository, never()).markCompleted(any());
+        verifyJobCompleted(false);
+    }
+
+    @Test
+    void shouldPublishBetSettlements() {
+        betsToSettle(bet);
+        commandProcessor.match();
+        verifySettlementsPublished(bet);
+    }
+
+    void betsToSettle(Bet... bets) {
+        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, 100))
+                .thenReturn(Arrays.stream(bets).toList());
+    }
+
+    void verifyJobCompleted(boolean completed) {
+        if (completed) {
+            verify(settlementJobRepository).markCompleted(settlementJob.id());
+        } else {
+            verify(settlementJobRepository, never()).markCompleted(any());
+        }
+    }
+
+    void verifySettlementsPublished(Bet... bets) {
+        for (val b : bets) {
+            verify(publisher).publish(new BetSettlementMessage().betId(b.id()));
+        }
     }
 }
