@@ -8,4 +8,8 @@ import java.util.UUID;
 public interface BetRepository {
 
     List<Bet> findByEventIdAndAfterIdAndLimit(UUID eventId, UUID afterId, int limit);
+
+    Bet findById(UUID id);
+
+    void markLost(UUID id);
 }

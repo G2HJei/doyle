@@ -16,5 +16,15 @@ public class Bet {
     private UUID       eventMarketId;
     private UUID       eventWinnerId;
     private BigDecimal amount;
+    private BetStatus  status;
+    private BetResult  result;
+
+    public enum BetStatus {
+        PLACED, SETTLED
+    }
+
+    public enum BetResult {
+        WON, LOST
+    }
 
 }
