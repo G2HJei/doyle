@@ -40,6 +40,7 @@ class PublishEventOutcomeServiceTest {
                 .eventId(command.eventId())
                 .eventName(command.eventName())
                 .eventWinnerId(command.eventWinnerId())
+                .published(false)
                 .version(expectedVersion);
     }
 }
