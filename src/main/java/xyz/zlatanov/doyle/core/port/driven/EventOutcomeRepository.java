@@ -8,4 +8,5 @@ public interface EventOutcomeRepository {
 
     EventOutcome findOneByEventId(UUID id);
 
+    void save(EventOutcome eventOutcome);
 }

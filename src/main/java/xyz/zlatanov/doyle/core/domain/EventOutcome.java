@@ -11,6 +11,6 @@ public class EventOutcome {
     private UUID    eventId;
     private String  eventName;
     private UUID    eventWinnerId;
-    private boolean published;
+    private boolean published; //todo move to a dedicated outbox table
     private int     version;
 }
