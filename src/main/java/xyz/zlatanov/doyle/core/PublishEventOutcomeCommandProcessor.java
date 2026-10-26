@@ -7,27 +7,20 @@ import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import xyz.zlatanov.doyle.core.port.driving.PublishEventOutcomeUseCase;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeUseCase {
 
     private final EventOutcomeRepository repository;
 
     public void publish(PublishEventOutcomeCommand command) {
-        //atm every update gets published, version? no-op? outbox?
-        val lastOutcome = repository.findOneByEventId(command.eventId());
-        if (lastOutcome == null) {
-            repository.save(new EventOutcome()
-                    .eventId(command.eventId())
-                    .eventName(command.eventName())
-                    .eventWinnerId(command.eventWinnerId())
-                    .published(false));
-        } else {
-            repository.save(lastOutcome
-                    .eventId(command.eventId())
-                    .eventName(command.eventName())
-                    .eventWinnerId(command.eventWinnerId())
-                    .published(false)
-                    .version(1));
-        }
+        val eventOutcome = Optional.ofNullable(repository.findOneByEventId(command.eventId()))
+                .orElseGet(EventOutcome::new);
+        repository.save(eventOutcome
+                .eventId(command.eventId())
+                .eventName(command.eventName())
+                .eventWinnerId(command.eventWinnerId())
+                .published(false));
     }
 }
