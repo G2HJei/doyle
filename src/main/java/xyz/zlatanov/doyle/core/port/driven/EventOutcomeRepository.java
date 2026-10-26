@@ -12,4 +12,6 @@ public interface EventOutcomeRepository {
     List<EventOutcome> findUnpublished(int limit);
 
     void save(EventOutcome eventOutcome);
+
+    void saveAll(List<EventOutcome> outcomesToRelay);
 }
