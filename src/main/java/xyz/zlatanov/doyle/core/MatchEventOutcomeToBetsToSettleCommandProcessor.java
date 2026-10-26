@@ -1,6 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementPublisher;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 import xyz.zlatanov.doyle.core.port.driving.MatchEventOutcomeToBetsToSettleUseCase;
@@ -13,5 +14,7 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
 
     @Override
     public void match() {
+        val job = settlementJobRepository.nextPending();
+        settlementJobRepository.markCompleted(job.id());
     }
 }
