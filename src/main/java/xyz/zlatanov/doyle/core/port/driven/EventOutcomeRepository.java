@@ -13,5 +13,5 @@ public interface EventOutcomeRepository {
 
     void save(EventOutcome eventOutcome);
 
-    void saveAll(List<EventOutcome> outcomesToRelay);
+    void markPublished(List<UUID> outcomeIds);
 }

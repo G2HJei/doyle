@@ -8,6 +8,7 @@ import java.util.UUID;
 @Data
 @Accessors(fluent = true)
 public class EventOutcome {
+    private UUID    id;
     private UUID    eventId;
     private String  eventName;
     private UUID    eventWinnerId;

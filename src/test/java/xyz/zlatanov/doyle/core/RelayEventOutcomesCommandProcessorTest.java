@@ -29,6 +29,7 @@ class RelayEventOutcomesCommandProcessorTest {
     RelayEventOutcomesCommandProcessor commandProcessor;
 
     EventOutcome outcome_1 = new EventOutcome()
+            .id(UUID.randomUUID())
             .eventId(UUID.randomUUID())
             .eventName("test event")
             .eventWinnerId(UUID.randomUUID())
@@ -65,6 +66,6 @@ class RelayEventOutcomesCommandProcessorTest {
     void verifyOutboxPublished(EventOutcome outcome) {
         val inOrder = inOrder(publisher, outcomeRepository);
         inOrder.verify(publisher).publish(expectedMessage(outcome));
-        inOrder.verify(outcomeRepository).saveAll(List.of(outcome.published(true)));
+        inOrder.verify(outcomeRepository).markPublished(List.of(outcome.id()));
     }
 }
