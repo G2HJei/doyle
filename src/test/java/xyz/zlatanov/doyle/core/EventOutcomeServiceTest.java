@@ -10,8 +10,6 @@ import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,7 +18,7 @@ class EventOutcomeServiceTest {
     @Mock
     EventOutcomePublisher publisher;
     @InjectMocks
-    EventOutcomeService   service = new EventOutcomeService(publisher);
+    EventOutcomeService   service;
 
     EventOutcome outcome = new EventOutcome()
             .id(UUID.randomUUID())
