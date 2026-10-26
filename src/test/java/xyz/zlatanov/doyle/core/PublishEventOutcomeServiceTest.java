@@ -13,17 +13,17 @@ import java.util.UUID;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class EventOutcomeServiceTest {
+class PublishEventOutcomeServiceTest {
 
     @Mock
-    EventOutcomePublisher publisher;
+    EventOutcomePublisher      publisher;
     @InjectMocks
-    EventOutcomeService   service;
+    PublishEventOutcomeService service;
 
     EventOutcome outcome = new EventOutcome()
-            .id(UUID.randomUUID())
-            .name("Test event")
-            .winnerId(UUID.randomUUID());
+            .eventId(UUID.randomUUID())
+            .eventName("Test event")
+            .eventWinnerId(UUID.randomUUID());
 
     @Test
     void shouldPublishEventOutcome() {
