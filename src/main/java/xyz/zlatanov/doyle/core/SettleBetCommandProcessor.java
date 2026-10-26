@@ -24,6 +24,8 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
         val eventOutcome = eventOutcomeLookup.getEventOutcome(bet.eventId());
         if (!Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId())) {
             betRepository.markLost(betId);
+        } else {
+            //todo settle
         }
     }
 }

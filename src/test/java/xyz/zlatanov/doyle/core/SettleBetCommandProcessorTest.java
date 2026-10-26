@@ -1,5 +1,6 @@
 package xyz.zlatanov.doyle.core;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,15 +40,34 @@ class SettleBetCommandProcessorTest {
             .eventId(outcome.eventId())
             .eventWinnerId(UUID.randomUUID()) //not the winner
             .status(PLACED);
+    Bet          winning   = new Bet()
+            .id(UUID.randomUUID())
+            .eventId(outcome.eventId())
+            .eventWinnerId(outcome.eventWinnerId())
+            .status(PLACED);
+
+    @BeforeEach
+    void setUp() {
+        when(eventOutcomeLookup.getEventOutcome(outcome.eventId())).thenReturn(outcome);
+    }
 
     @Test
     void shouldSettleBetAsLost() {
         when(betRepository.findById(losingBet.id())).thenReturn(losingBet);
-        when(eventOutcomeLookup.getEventOutcome(outcome.eventId())).thenReturn(outcome);
 
         commandProcessor.settle(new SettleBetCommand().betId(losingBet.id()));
 
         verify(betRepository).markLost(losingBet.id());
         verifyNoInteractions(betSettlementRepository);
+    }
+
+    @Test
+    void shouldSettleWinningBet() {
+        when(betRepository.findById(winning.id())).thenReturn(winning);
+
+        commandProcessor.settle(new SettleBetCommand().betId(winning.id()));
+
+        //todo verify status and result
+        //todo verify settlement saved
     }
 }
