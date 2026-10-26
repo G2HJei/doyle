@@ -1,8 +1,8 @@
 package xyz.zlatanov.doyle.core.port.driven;
 
-import java.util.UUID;
+import xyz.zlatanov.doyle.core.domain.SettlementJob;
 
 public interface SettlementJobRepository {
 
-    void createJob(UUID eventId, int eventVersion);
+    void save(SettlementJob job);
 }

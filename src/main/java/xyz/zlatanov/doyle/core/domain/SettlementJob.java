@@ -11,4 +11,5 @@ public class SettlementJob {
 
     private UUID id;
     private UUID eventId;
+    private int  version;
 }

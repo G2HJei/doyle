@@ -27,7 +27,7 @@ class ConsumeEventOutcomeServiceTest {
     @Test
     void shouldCreateSettlementJob() {
         service.consumeOutcome(outcome);
-        verify(settlementJobRepository).createJob(outcome.eventId(), outcome.version());
+        verify(settlementJobRepository).save(outcome.eventId(), outcome.version());
     }
 
 }
