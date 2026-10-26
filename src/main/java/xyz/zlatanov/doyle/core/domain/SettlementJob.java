@@ -9,6 +9,8 @@ import java.util.UUID;
 @Accessors(fluent = true)
 public class SettlementJob {
 
-    private UUID eventId;
-    private int  outcomeVersion;
+    private UUID    id;
+    private UUID    eventId;
+    private int     outcomeVersion;
+    private boolean completed;
 }
