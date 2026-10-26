@@ -2,6 +2,7 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
@@ -19,13 +20,17 @@ public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUse
     public void relayOutcomes() {
         val outcomesToRelay = outcomeRepository.findUnpublished(CHUNK_SIZE);
         for (val outcome : outcomesToRelay) {
-            publisher.publish(new EventOutcomeMessage()
-                    .eventId(outcome.eventId())
-                    .eventName(outcome.eventName())
-                    .eventWinnerId(outcome.eventWinnerId())
-                    .version(outcome.version()));
+            publish(outcome);
             outcome.published(true);
         }
         outcomeRepository.saveAll(outcomesToRelay);
+    }
+
+    private void publish(EventOutcome outcome) {
+        publisher.publish(new EventOutcomeMessage()
+                .eventId(outcome.eventId())
+                .eventName(outcome.eventName())
+                .eventWinnerId(outcome.eventWinnerId())
+                .version(outcome.version()));
     }
 }
