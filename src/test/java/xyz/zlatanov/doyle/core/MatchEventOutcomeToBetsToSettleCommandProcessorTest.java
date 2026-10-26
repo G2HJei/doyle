@@ -54,7 +54,7 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
     @Test
     void shouldPublishBetSettlements() {
         when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
-        when(betRepository.findByEventIdAndAfterId(settlementJob.eventId(), null)).thenReturn(List.of(bet));
+        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, 100)).thenReturn(List.of(bet));
 
         commandProcessor.match();
 

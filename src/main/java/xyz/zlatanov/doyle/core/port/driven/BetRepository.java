@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface BetRepository {
 
-    List<Bet> findByEventIdAndAfterId(UUID eventId, UUID afterId);
+    List<Bet> findByEventIdAndAfterIdAndLimit(UUID eventId, UUID afterId, int limit);
 }
