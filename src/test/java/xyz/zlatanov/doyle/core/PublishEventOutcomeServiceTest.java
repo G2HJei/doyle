@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
+import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 
 import java.util.UUID;
 
@@ -16,6 +17,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class PublishEventOutcomeServiceTest {
 
+    @Mock
+    EventOutcomeRepository     repository;
     @Mock
     EventOutcomePublisher      publisher;
     @InjectMocks
@@ -33,7 +36,7 @@ class PublishEventOutcomeServiceTest {
             .version(1);
 
     @Test
-    void shouldPublishEventOutcome() {
+    void shouldPublishNewEventOutcome() {
         service.publish(command);
         verify(publisher).publish(outcome);
     }
