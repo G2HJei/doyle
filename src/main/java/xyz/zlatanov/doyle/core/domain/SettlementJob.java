@@ -12,5 +12,6 @@ public class SettlementJob {
     private UUID    id;
     private UUID    eventId;
     private int     outcomeVersion;
+    private UUID    lastBetId;
     private boolean completed;
 }
