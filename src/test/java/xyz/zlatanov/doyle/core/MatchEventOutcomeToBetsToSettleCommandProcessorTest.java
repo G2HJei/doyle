@@ -60,4 +60,12 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
         verify(publisher).publish(new BetSettlementMessage().betId(bet.id()));
     }
+
+    @Test
+    void shouldNotCompleteJobWhenBetsWereSettled() {
+        when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
+        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, 100)).thenReturn(List.of(bet));
+        commandProcessor.match();
+        verify(settlementJobRepository, never()).markCompleted(any());
+    }
 }
