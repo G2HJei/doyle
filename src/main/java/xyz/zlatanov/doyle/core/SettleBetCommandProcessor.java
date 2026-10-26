@@ -10,6 +10,9 @@ import xyz.zlatanov.doyle.core.port.driving.SettleBetUseCase;
 
 import java.util.Objects;
 
+import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.LOST;
+import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
+
 @RequiredArgsConstructor
 public class SettleBetCommandProcessor implements SettleBetUseCase {
 
@@ -23,7 +26,7 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
         val bet = betRepository.findById(betId);
         val eventOutcome = eventOutcomeLookup.getEventOutcome(bet.eventId());
         if (!Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId())) {
-            betRepository.markLost(betId);
+            betRepository.updateStatusAndResult(betId, SETTLED, LOST);
         } else {
             //todo settle
         }

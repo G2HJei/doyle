@@ -11,5 +11,5 @@ public interface BetRepository {
 
     Bet findById(UUID id);
 
-    void markLost(UUID id);
+    void updateStatusAndResult(UUID id, Bet.BetStatus status, Bet.BetResult result);
 }

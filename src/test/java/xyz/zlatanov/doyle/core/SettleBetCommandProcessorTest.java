@@ -16,7 +16,9 @@ import xyz.zlatanov.doyle.core.port.driven.EventOutcomeLookup;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
+import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.LOST;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
 
 @ExtendWith(MockitoExtension.class)
 class SettleBetCommandProcessorTest {
@@ -57,7 +59,7 @@ class SettleBetCommandProcessorTest {
 
         commandProcessor.settle(new SettleBetCommand().betId(losingBet.id()));
 
-        verify(betRepository).markLost(losingBet.id());
+        verify(betRepository).updateStatusAndResult(losingBet.id(), SETTLED, LOST);
         verifyNoInteractions(betSettlementRepository);
     }
 
