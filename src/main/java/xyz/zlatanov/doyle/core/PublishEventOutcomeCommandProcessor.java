@@ -20,6 +20,12 @@ public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeU
                     .eventId(command.eventId())
                     .eventName(command.eventName())
                     .eventWinnerId(command.eventWinnerId())
+                    .published(false));
+        } else {
+            repository.save(lastOutcome
+                    .eventId(command.eventId())
+                    .eventName(command.eventName())
+                    .eventWinnerId(command.eventWinnerId())
                     .published(false)
                     .version(1));
         }
