@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 
 import java.util.UUID;
@@ -20,14 +21,20 @@ class PublishEventOutcomeServiceTest {
     @InjectMocks
     PublishEventOutcomeService service;
 
-    EventOutcome outcome = new EventOutcome()
+    PublishEventOutcomeCommand command = new PublishEventOutcomeCommand()
             .eventId(UUID.randomUUID())
-            .eventName("Test event")
+            .eventName("Victoria-Levski")
             .eventWinnerId(UUID.randomUUID());
+
+    EventOutcome outcome = new EventOutcome()
+            .eventId(command.eventId())
+            .eventName("Victoria-Levski")
+            .eventWinnerId(command.eventWinnerId())
+            .version(1);
 
     @Test
     void shouldPublishEventOutcome() {
-        service.publish(outcome);
+        service.publish(command);
         verify(publisher).publish(outcome);
     }
 }

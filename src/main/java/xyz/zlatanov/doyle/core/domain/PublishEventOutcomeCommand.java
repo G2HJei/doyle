@@ -1,0 +1,15 @@
+package xyz.zlatanov.doyle.core.domain;
+
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.util.UUID;
+
+@Data
+@Accessors(fluent = true)
+public class PublishEventOutcomeCommand {
+
+    private UUID   eventId;
+    private String eventName;
+    private UUID   eventWinnerId;
+}

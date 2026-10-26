@@ -1,7 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driving.PublishEventOutcomeUseCase;
 
@@ -10,8 +10,8 @@ public class PublishEventOutcomeService implements PublishEventOutcomeUseCase {
 
     private final EventOutcomePublisher publisher;
 
-    public void publish(EventOutcome outcome) {
+    public void publish(PublishEventOutcomeCommand command) {
         //atm every update gets published, version? no-op? outbox?
-        publisher.publish(outcome);
+        publisher.publish(null);
     }
 }
