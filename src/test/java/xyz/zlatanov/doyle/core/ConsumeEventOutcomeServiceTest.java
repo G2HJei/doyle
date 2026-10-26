@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
+import xyz.zlatanov.doyle.core.domain.SettlementJob;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
 import java.util.UUID;
@@ -27,7 +28,9 @@ class ConsumeEventOutcomeServiceTest {
     @Test
     void shouldCreateSettlementJob() {
         service.consumeOutcome(outcome);
-        verify(settlementJobRepository).save(outcome.eventId(), outcome.version());
+        verify(settlementJobRepository).save(new SettlementJob()
+                .eventId(outcome.eventId())
+                .outcomeVersion(outcome.version()));
     }
 
 }

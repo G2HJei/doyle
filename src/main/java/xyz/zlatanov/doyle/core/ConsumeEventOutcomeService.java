@@ -22,6 +22,6 @@ public class ConsumeEventOutcomeService implements ConsumeEventOutcomeUseCase {
     private SettlementJob toSettlementJob(EventOutcomeMessage outcomeMsg) {
         return new SettlementJob()
                 .eventId(outcomeMsg.eventId())
-                .version(outcomeMsg.version());
+                .outcomeVersion(outcomeMsg.version());
     }
 }
