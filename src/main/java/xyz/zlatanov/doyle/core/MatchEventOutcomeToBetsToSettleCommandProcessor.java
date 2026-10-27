@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEventOutcomeToBetsToSettleUseCase {
 
-    static final int CHUNK_SIZE = 2;
+    static final int CHUNK_SIZE = 1000;
 
     private final SettlementJobRepository settlementJobRepository;
     private final BetRepository           betRepository;
@@ -33,11 +33,11 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
         }
         val bets = getBetsToSettle(job);
         if (bets.isEmpty()) {
-            settlementJobRepository.save(job.completed(true));
+            completeJob(job);
             log.info("Settlement job completed: jobId={}, eventId={}, outcomeVersion={}", job.id(), job.eventId(), job.outcomeVersion());
         } else {
-            settle(bets);
-            settlementJobRepository.save(job.lastBetId(bets.get(bets.size() - 1).id()));
+            publishBetSettlements(bets);
+            updateJobProgress(job, bets);
             log.info("Bet settlements sent: jobId={}, eventId={}, outcomeVersion={}, count={}, lastBetId={}",
                     job.id(), job.eventId(), job.outcomeVersion(), bets.size(), job.lastBetId());
         }
@@ -47,7 +47,24 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
         return betRepository.findByEventIdAndAfterIdAndLimit(job.eventId(), job.lastBetId(), CHUNK_SIZE);
     }
 
-    private void settle(List<Bet> bets) {
-        bets.forEach(b -> betSettlementPublisher.publish(new BetSettlementMessage().betId(b.id())));
+    private void completeJob(SettlementJob job) {
+        settlementJobRepository.save(job.completed(true));
+    }
+
+    private void publishBetSettlements(List<Bet> bets) {
+        bets.stream()
+                .map(this::toSettlementMessage)
+                .forEach(betSettlementPublisher::publish);
+    }
+
+    private void updateJobProgress(SettlementJob job, List<Bet> bets) {
+        val lastBetId = bets.get(bets.size() - 1).id();
+        settlementJobRepository.save(job.lastBetId(lastBetId));
+    }
+
+    private BetSettlementMessage toSettlementMessage(Bet bet) {
+        return new BetSettlementMessage()
+                .betId(bet.id())
+                .userId(bet.userId());
     }
 }

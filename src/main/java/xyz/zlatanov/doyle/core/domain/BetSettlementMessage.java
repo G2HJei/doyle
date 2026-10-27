@@ -13,4 +13,5 @@ import java.util.UUID;
 public class BetSettlementMessage {
 
     private UUID betId;
+    private UUID userId;
 }

@@ -32,12 +32,13 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
     }
 
     @Override
-    public SettlementJob nextPending() { // todo select for update skip locked pessimistic lock? (pointless with H2)
+    public SettlementJob nextPending() {
         return jdbcClient.sql("""
                         SELECT * FROM settlement_job
                         WHERE completed = FALSE
                         ORDER BY id
                         LIMIT 1
+                        FOR UPDATE SKIP LOCKED;
                         """)
                 .query(this::toSettlementJob)
                 .optional()

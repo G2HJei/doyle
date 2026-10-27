@@ -111,7 +111,7 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     void verifySettlementsPublished(Bet... bets) {
         for (val b : bets) {
-            verify(publisher).publish(new BetSettlementMessage().betId(b.id()));
+            verify(publisher).publish(new BetSettlementMessage().betId(b.id()).userId(b.userId()));
         }
     }
 }

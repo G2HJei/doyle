@@ -37,8 +37,8 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
                         WHERE published = FALSE
                         ORDER BY id
                         LIMIT :limit
+                        FOR UPDATE SKIP LOCKED
                         """)
-                //todo add pessimistic lock like "FOR UPDATE SKIP LOCKED" in real (non-H2) scenario for scaling
                 .param("limit", limit)
                 .query(this::toEventOutcome)
                 .list();

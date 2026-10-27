@@ -14,7 +14,7 @@ import xyz.zlatanov.doyle.core.port.driving.RelayEventOutcomesUseCase;
 @RequiredArgsConstructor
 public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUseCase {
 
-    private static final int CHUNK_SIZE = 2;
+    private static final int CHUNK_SIZE = 1000;
 
     private final EventOutcomeRepository outcomeRepository;
     private final EventOutcomePublisher  publisher;
