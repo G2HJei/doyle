@@ -20,6 +20,8 @@ import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.P
 
 class BetTest {
 
+    BigDecimal TWO = BigDecimal.valueOf(2);
+
     EventOutcome outcome = new EventOutcome()
             .eventId(new EventId(randomUUID()))
             .eventWinnerId(new CompetitorId(randomUUID()))
@@ -38,7 +40,7 @@ class BetTest {
         val payout = winningBet.settle(outcome);
         assertResult(
                 expectedBet(winningBet, WON),
-                expectedSettlement(winningBet, BigDecimal.valueOf(2)),
+                expectedSettlement(winningBet, TWO),
                 winningBet, payout);
     }
 
@@ -62,7 +64,7 @@ class BetTest {
         val payout = correctionBet.settle(outcome);
         assertResult(
                 expectedBet(correctionBet, LOST),
-                expectedSettlement(correctionBet, BigDecimal.valueOf(-4)),
+                expectedSettlement(correctionBet, TWO.negate()),
                 correctionBet, payout);
     }
 
@@ -72,7 +74,7 @@ class BetTest {
         val payout = correctionLosingBet.settle(outcome);
         assertResult(
                 expectedBet(correctionLosingBet, WON),
-                expectedSettlement(correctionLosingBet, BigDecimal.valueOf(2)),
+                expectedSettlement(correctionLosingBet, TWO),
                 correctionLosingBet, payout);
     }
 

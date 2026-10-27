@@ -19,6 +19,11 @@ import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.P
 @Accessors(fluent = true)
 public class Bet {
 
+    // Odds aren't in the model; assume fixed decimal odds of 2.0 (even money):
+    // - a win pays out twice the stake
+    // - revoking a win (WON -> LOST) charges back that full payout
+    private static final BigDecimal ODDS = BigDecimal.valueOf(2);
+
     private BetId         id;
     private UserId        userId;
     private EventId       eventId;
@@ -74,9 +79,9 @@ public class Bet {
         return PLACED == status && LOST == newResult;
     }
 
-    // odds not included in the model, so assumption is the odds are always 2 and the bet amount is equal to the payout
     private BigDecimal deltaAmount(BetResult newResult) {
-        return revokesWin(newResult) ? amount.negate().multiply(BigDecimal.valueOf(4)) : amount.multiply(BigDecimal.valueOf(2));
+        val payoutAmount = amount.multiply(ODDS);
+        return revokesWin(newResult) ? payoutAmount.negate() : payoutAmount;
     }
 
     private boolean revokesWin(BetResult newResult) {

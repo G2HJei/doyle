@@ -46,10 +46,10 @@ in-memory H2 database and is lost on restart. The same calls can be made from th
    ```sh
    curl 'localhost:8080/poc/event-data?eventId=00000000-0000-0000-0000-0000000000e1'
    ```
-   Bets on the winner are `SETTLED`/`WON` with a `bet_settlement` paying out their amount. The rest are
+   Bets on the winner are `SETTLED`/`WON` with a `bet_settlement` paying out twice their amount. The rest are
    `SETTLED`/`LOST` with no payout.
-4. To correct the winner, publish the outcome again with a different `eventWinnerId`. The outcome version increments
-   and the bets are resettled: revoked wins get a negative payout, new wins a positive one.
+4. To correct the winner, publish the outcome again with a different `eventWinnerId`. The outcome version increments,
+   and the bets are resettled (revoked wins get a negative payout, new wins get payout).
 
 ## Testing
 
@@ -59,12 +59,12 @@ in-memory H2 database and is lost on restart. The same calls can be made from th
 ## Assumptions & Decisions
 
 - Assumed the market is always based on the winner of the event.
-- Assumed the odds are always 2.00 meaning the bet amount is the sum to be settled
+- Odds aren't in the model; assume fixed decimal odds of 2.0 (even money) so a win pays out twice the stake
+- and revoking a win (WON -> LOST) charges back that full payout.
 
-
-- Bet settlement always uses latest outcome data for the event to settle against.
-- Split the publish outcome use case to track event outcome versions in case of winner correction at a later point
-  (error, VAR decision etc.) resulting in a second outbox
+- Bet settlement always uses the latest outcome data for the event to settle against.
+- Split the publishing outcome use case to track event outcome versions in case of winner correction at a later point
+  (error, VAR decision, etc.) resulting in a second outbox
 
 ## Architecture overview
 

@@ -44,7 +44,7 @@ class BetSettlementAcceptanceTest {
 
         event.broadcastWinner("Real Madrid CF");
 
-        betting.assertSettled(betsOn("Real Madrid CF").won().withPayouts("10.00"));
+        betting.assertSettled(betsOn("Real Madrid CF").won().withPayouts("20.00"));
         betting.assertSettled(betsOn("FC Barcelona").lost().withNoPayouts());
     }
 
@@ -53,12 +53,12 @@ class BetSettlementAcceptanceTest {
         betting.place(bet().on("Argentina").stake("10.00"));
         betting.place(bet().on("England").stake("20.00"));
         event.broadcastWinner("Argentina");
-        betting.assertSettled(betsOn("Argentina").won().withPayouts("10.00"));
+        betting.assertSettled(betsOn("Argentina").won().withPayouts("20.00"));
         betting.assertSettled(betsOn("England").lost().withNoPayouts());
 
         event.correctWinner("England");
 
-        betting.assertSettled(betsOn("Argentina").lost().withPayouts("10.00", "-10.00"));
-        betting.assertSettled(betsOn("England").won().withPayouts("20.00"));
+        betting.assertSettled(betsOn("Argentina").lost().withPayouts("20.00", "-20.00"));
+        betting.assertSettled(betsOn("England").won().withPayouts("40.00"));
     }
 }
