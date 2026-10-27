@@ -3,6 +3,7 @@ package xyz.zlatanov.doyle.adapter.driven;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import xyz.zlatanov.doyle.core.domain.EventId;
 import xyz.zlatanov.doyle.core.port.driven.EventDataRepository;
 
 import java.sql.ResultSet;
@@ -15,7 +16,7 @@ public class JdbcEventDataRepository implements EventDataRepository {
     private final JdbcClient jdbcClient;
 
     @Override
-    public Map<String, List<Map<String, Object>>> findByEventId(UUID eventId) {
+    public Map<String, List<Map<String, Object>>> findByEventId(EventId eventId) {
         val data = new LinkedHashMap<String, List<Map<String, Object>>>();
         data.put("event_outcome", rows("""
                 SELECT * FROM event_outcome
@@ -40,9 +41,9 @@ public class JdbcEventDataRepository implements EventDataRepository {
         return data;
     }
 
-    private List<Map<String, Object>> rows(String sql, UUID eventId) {
+    private List<Map<String, Object>> rows(String sql, EventId eventId) {
         return jdbcClient.sql(sql)
-                .param("eventId", eventId)
+                .param("eventId", eventId == null ? null : eventId.value())
                 .query(this::toRow)
                 .list();
     }

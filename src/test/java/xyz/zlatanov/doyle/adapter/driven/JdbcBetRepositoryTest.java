@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
-import xyz.zlatanov.doyle.core.domain.Bet;
+import xyz.zlatanov.doyle.core.domain.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Comparator.comparing;
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.WON;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
@@ -25,7 +25,7 @@ class JdbcBetRepositoryTest {
     @Autowired
     JdbcBetRepository repository;
 
-    UUID eventId = UUID.randomUUID();
+    EventId eventId = new EventId(randomUUID());
 
     @Test
     void shouldInsertNewBet() {
@@ -61,16 +61,16 @@ class JdbcBetRepositoryTest {
 
     @Test
     void shouldReturnNullForUnknownBet() {
-        assertNull(repository.findById(UUID.randomUUID()));
+        assertNull(repository.findById(new BetId(randomUUID())));
     }
 
     @Test
     void shouldPageThroughEventBetsOrderedById() {
-        val bets = List.of(bet(eventId), bet(UUID.randomUUID()), bet(eventId), bet(eventId));
+        val bets = List.of(bet(eventId), bet(new EventId(randomUUID())), bet(eventId), bet(eventId));
         bets.forEach(repository::save);
         val eventBets = bets.stream()
                 .filter(b -> eventId.equals(b.eventId()))
-                .sorted(comparing(Bet::id))
+                .sorted(comparing(b -> b.id().value()))
                 .toList();
 
         assertEquals(eventBets.subList(0, 2), repository.findByEventIdAndAfterIdAndLimit(eventId, null, 2));
@@ -79,12 +79,12 @@ class JdbcBetRepositoryTest {
         assertEquals(List.of(), repository.findByEventIdAndAfterIdAndLimit(eventId, eventBets.get(2).id(), 2));
     }
 
-    Bet bet(UUID eventId) {
+    Bet bet(EventId eventId) {
         return new Bet()
-                .userId(UUID.randomUUID())
+                .userId(new UserId(randomUUID()))
                 .eventId(eventId)
-                .eventMarketId(UUID.randomUUID())
-                .eventWinnerId(UUID.randomUUID())
+                .eventMarketId(new EventMarketId(randomUUID()))
+                .eventWinnerId(new CompetitorId(randomUUID()))
                 .amount(new BigDecimal("10.50"))
                 .status(PLACED);
     }

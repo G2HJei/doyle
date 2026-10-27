@@ -5,7 +5,7 @@ import lombok.val;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.Bet;
+import xyz.zlatanov.doyle.core.domain.*;
 import xyz.zlatanov.doyle.core.domain.Bet.BetResult;
 import xyz.zlatanov.doyle.core.domain.Bet.BetStatus;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
@@ -23,24 +23,24 @@ public class JdbcBetRepository implements BetRepository {
     private final UUIDService uuidService;
 
     @Override
-    public List<Bet> findByEventIdAndAfterIdAndLimit(UUID eventId, UUID afterId, int limit) {
+    public List<Bet> findByEventIdAndAfterIdAndLimit(EventId eventId, BetId afterId, int limit) {
         return jdbcClient.sql("""
                         SELECT * FROM bet
                         WHERE event_id = :eventId AND (CAST(:afterId AS UUID) IS NULL OR id > :afterId)
                         ORDER BY id
                         LIMIT :limit
                         """)
-                .param("eventId", eventId)
-                .param("afterId", afterId)
+                .param("eventId", eventId.value())
+                .param("afterId", afterId == null ? null : afterId.value())
                 .param("limit", limit)
                 .query(this::toBet)
                 .list();
     }
 
     @Override
-    public Bet findById(UUID id) {
+    public Bet findById(BetId id) {
         return jdbcClient.sql("SELECT * FROM bet WHERE id = :id")
-                .param("id", id)
+                .param("id", id.value())
                 .query(this::toBet)
                 .optional()
                 .orElse(null);
@@ -56,7 +56,7 @@ public class JdbcBetRepository implements BetRepository {
     }
 
     private void insert(Bet bet) {
-        bet.id(uuidService.get()).version(1);
+        bet.id(new BetId(uuidService.get())).version(1);
         jdbcClient.sql("""
                         INSERT INTO bet (id, user_id, event_id, event_market_id, event_winner_id, amount,
                                          status, result, settled_event_version, version)
@@ -87,11 +87,11 @@ public class JdbcBetRepository implements BetRepository {
 
     private MapSqlParameterSource params(Bet bet) {
         return new MapSqlParameterSource()
-                .addValue("id", bet.id())
-                .addValue("userId", bet.userId())
-                .addValue("eventId", bet.eventId())
-                .addValue("eventMarketId", bet.eventMarketId())
-                .addValue("eventWinnerId", bet.eventWinnerId())
+                .addValue("id", bet.id().value())
+                .addValue("userId", bet.userId().value())
+                .addValue("eventId", bet.eventId().value())
+                .addValue("eventMarketId", bet.eventMarketId().value())
+                .addValue("eventWinnerId", bet.eventWinnerId().value())
                 .addValue("amount", bet.amount())
                 .addValue("status", bet.status().name())
                 .addValue("result", bet.result() == null ? null : bet.result().name())
@@ -102,11 +102,11 @@ public class JdbcBetRepository implements BetRepository {
     private Bet toBet(ResultSet rs, int rowNum) throws SQLException {
         val result = rs.getString("result");
         return new Bet()
-                .id(rs.getObject("id", UUID.class))
-                .userId(rs.getObject("user_id", UUID.class))
-                .eventId(rs.getObject("event_id", UUID.class))
-                .eventMarketId(rs.getObject("event_market_id", UUID.class))
-                .eventWinnerId(rs.getObject("event_winner_id", UUID.class))
+                .id(new BetId(rs.getObject("id", UUID.class)))
+                .userId(new UserId(rs.getObject("user_id", UUID.class)))
+                .eventId(new EventId(rs.getObject("event_id", UUID.class)))
+                .eventMarketId(new EventMarketId(rs.getObject("event_market_id", UUID.class)))
+                .eventWinnerId(new CompetitorId(rs.getObject("event_winner_id", UUID.class)))
                 .amount(rs.getBigDecimal("amount"))
                 .status(BetStatus.valueOf(rs.getString("status")))
                 .result(result == null ? null : BetResult.valueOf(result))

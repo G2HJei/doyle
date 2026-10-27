@@ -1,15 +1,16 @@
 package xyz.zlatanov.doyle.core.port.driven;
 
 import xyz.zlatanov.doyle.core.domain.Bet;
+import xyz.zlatanov.doyle.core.domain.BetId;
+import xyz.zlatanov.doyle.core.domain.EventId;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface BetRepository {
 
-    List<Bet> findByEventIdAndAfterIdAndLimit(UUID eventId, UUID afterId, int limit);
+    List<Bet> findByEventIdAndAfterIdAndLimit(EventId eventId, BetId afterId, int limit);
 
-    Bet findById(UUID id);
+    Bet findById(BetId id);
 
     void save(Bet bet);
 }

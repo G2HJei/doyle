@@ -3,13 +3,13 @@ package xyz.zlatanov.doyle.core;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.Bet;
+import xyz.zlatanov.doyle.core.domain.BetId;
 import xyz.zlatanov.doyle.core.domain.SeedBetsCommand;
 import xyz.zlatanov.doyle.core.domain.SeedBetsCommand.BetTemplate;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driving.SeedBetsUseCase;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
@@ -21,7 +21,7 @@ public class SeedBetsCommandProcessor implements SeedBetsUseCase {
 
     @Transactional
     @Override
-    public List<UUID> seed(SeedBetsCommand command) { // command returning for POC purposes only
+    public List<BetId> seed(SeedBetsCommand command) { // command returning for POC purposes only
         return Stream.generate(() -> toBet(command.template()))
                 .limit(command.createCount())
                 .peek(betRepository::save) // for POC purposes performance here is irrelevant

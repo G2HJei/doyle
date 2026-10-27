@@ -17,7 +17,7 @@ at [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index
 ## Testing
 
 - `mvn test` runs the unit tests.
-- `mvn test -Dtest=BetSettlementAcceptanceTest` runs the acceptance tests against a locally running Doyle.
+- `mvn test -Dtest=BetSettlementAcceptanceTest` runs the acceptance tests.
 
 ## Assumptions & Decisions
 

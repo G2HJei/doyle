@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
-import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
 import xyz.zlatanov.doyle.core.port.driving.PublishEventOutcomeUseCase;
 
 import static org.springframework.http.HttpStatus.ACCEPTED;
@@ -33,7 +32,7 @@ public class EventOutcomeRestController {
     @ApiResponse(responseCode = "409", description = "Outcome of the event changed by a concurrent request. Retry.",
             content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE,
                     schema = @Schema(implementation = ProblemDetail.class)))
-    public void publish(@Valid @RequestBody PublishEventOutcomeCommand command) {
-        publishEventOutcomeUseCase.publish(command);
+    public void publish(@Valid @RequestBody PublishEventOutcomeRequest request) {
+        publishEventOutcomeUseCase.publish(request.toCommand());
     }
 }

@@ -8,6 +8,7 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.common.message.MessageExt;
 import tools.jackson.databind.json.JsonMapper;
+import xyz.zlatanov.doyle.core.domain.BetId;
 import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
 import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
 import xyz.zlatanov.doyle.core.port.driving.SettleBetUseCase;
@@ -39,6 +40,6 @@ public class RocketMqBetSettlementListener implements MessageListenerOrderly {
 
     private void settle(MessageExt message) {
         val settlement = jsonMapper.readValue(message.getBody(), BetSettlementMessage.class);
-        settleBetUseCase.settle(new SettleBetCommand().betId(settlement.betId()));
+        settleBetUseCase.settle(new SettleBetCommand().betId(new BetId(settlement.betId())));
     }
 }

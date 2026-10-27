@@ -6,6 +6,7 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import xyz.zlatanov.doyle.core.domain.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.BetSettlementId;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
@@ -25,7 +26,7 @@ public class JdbcBetSettlementRepository implements BetSettlementRepository {
     }
 
     private void insert(BetSettlement betSettlement) {
-        betSettlement.id(uuidService.get());
+        betSettlement.id(new BetSettlementId(uuidService.get()));
         jdbcClient.sql("""
                         INSERT INTO bet_settlement (id, bet_id, delta_amount, payout_status, settled_event_version)
                         VALUES (:id, :betId, :deltaAmount, :payoutStatus, :settledEventVersion)
@@ -51,8 +52,8 @@ public class JdbcBetSettlementRepository implements BetSettlementRepository {
 
     private MapSqlParameterSource params(BetSettlement betSettlement) {
         return new MapSqlParameterSource()
-                .addValue("id", betSettlement.id())
-                .addValue("betId", betSettlement.betId())
+                .addValue("id", betSettlement.id().value())
+                .addValue("betId", betSettlement.betId().value())
                 .addValue("deltaAmount", betSettlement.deltaAmount())
                 .addValue("payoutStatus", betSettlement.payoutStatus().name())
                 .addValue("settledEventVersion", betSettlement.settledEventVersion());

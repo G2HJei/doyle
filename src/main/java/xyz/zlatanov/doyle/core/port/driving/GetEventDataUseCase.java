@@ -1,10 +1,11 @@
 package xyz.zlatanov.doyle.core.port.driving;
 
+import xyz.zlatanov.doyle.core.domain.EventId;
+
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public interface GetEventDataUseCase {
 
-    Map<String, List<Map<String, Object>>> get(UUID eventId);
+    Map<String, List<Map<String, Object>>> get(EventId eventId);
 }

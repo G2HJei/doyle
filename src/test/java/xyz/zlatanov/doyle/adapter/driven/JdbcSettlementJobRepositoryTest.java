@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Comparator.comparing;
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
 
@@ -27,13 +26,13 @@ class JdbcSettlementJobRepositoryTest {
     @Autowired
     JdbcBetRepository           betRepository;
 
-    UUID eventId = UUID.randomUUID();
+    EventId eventId = new EventId(randomUUID());
 
     Bet bet = new Bet()
-            .userId(UUID.randomUUID())
+            .userId(new UserId(randomUUID()))
             .eventId(eventId)
-            .eventMarketId(UUID.randomUUID())
-            .eventWinnerId(UUID.randomUUID())
+            .eventMarketId(new EventMarketId(randomUUID()))
+            .eventWinnerId(new CompetitorId(randomUUID()))
             .amount(new BigDecimal("10.50"))
             .status(PLACED);
 
@@ -83,7 +82,7 @@ class JdbcSettlementJobRepositoryTest {
         val jobs = List.of(job(1), job(2), job(3));
         jobs.forEach(repository::save);
 
-        for (val job : jobs.stream().sorted(comparing(SettlementJob::id)).toList()) {
+        for (val job : jobs.stream().sorted(comparing(j -> j.id().value())).toList()) {
             assertEquals(job, repository.nextPending());
             repository.save(job.completed(true));
         }

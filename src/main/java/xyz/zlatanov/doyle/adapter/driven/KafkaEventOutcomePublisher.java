@@ -17,9 +17,9 @@ public class KafkaEventOutcomePublisher implements EventOutcomePublisher {
 
     @Override
     @SneakyThrows
-    public void publish(EventOutcomeMessage outcome) {
-        val partitionKey = outcome.eventId().toString();
-        kafkaTemplate.send(topic, partitionKey, outcome)
+    public void publish(EventOutcomeMessage message) {
+        val partitionKey = message.eventId().toString();
+        kafkaTemplate.send(topic, partitionKey, message)
                 .get(5, SECONDS);
     }
 }

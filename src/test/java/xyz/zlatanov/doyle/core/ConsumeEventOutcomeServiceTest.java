@@ -5,12 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
+import xyz.zlatanov.doyle.core.domain.ConsumeEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.EventId;
 import xyz.zlatanov.doyle.core.domain.SettlementJob;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
-import java.util.UUID;
-
+import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,16 +21,16 @@ class ConsumeEventOutcomeServiceTest {
     @InjectMocks
     ConsumeEventOutcomeService service;
 
-    EventOutcomeMessage outcome = new EventOutcomeMessage()
-            .eventId(UUID.randomUUID())
-            .version(-1);
+    ConsumeEventOutcomeCommand command = new ConsumeEventOutcomeCommand()
+            .eventId(new EventId(randomUUID()))
+            .outcomeVersion(-1);
 
     @Test
     void shouldCreateSettlementJob() {
-        service.consumeOutcome(outcome);
+        service.consumeOutcome(command);
         verify(settlementJobRepository).save(new SettlementJob()
-                .eventId(outcome.eventId())
-                .outcomeVersion(outcome.version()));
+                .eventId(command.eventId())
+                .outcomeVersion(command.outcomeVersion()));
     }
 
 }

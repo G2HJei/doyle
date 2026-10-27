@@ -7,7 +7,10 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import xyz.zlatanov.doyle.core.domain.BetId;
+import xyz.zlatanov.doyle.core.domain.EventId;
 import xyz.zlatanov.doyle.core.domain.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.SettlementJobId;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
@@ -46,13 +49,13 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
     }
 
     private void insert(SettlementJob job) {
-        val id = uuidService.get();
+        val id = new SettlementJobId(uuidService.get());
         try {
             jdbcClient.sql("""
                             INSERT INTO settlement_job (id, event_id, outcome_version, last_bet_id, completed, version)
                             VALUES (:id, :eventId, :outcomeVersion, :lastBetId, :completed, :version)
                             """)
-                    .paramSource(params(job).addValue("id", id).addValue("version", 1))
+                    .paramSource(params(job).addValue("id", id.value()).addValue("version", 1))
                     .update();
             job.id(id).version(1);
         } catch (DuplicateKeyException e) {
@@ -80,20 +83,21 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
 
     private MapSqlParameterSource params(SettlementJob job) {
         return new MapSqlParameterSource()
-                .addValue("id", job.id())
-                .addValue("eventId", job.eventId())
+                .addValue("id", job.id() == null ? null : job.id().value())
+                .addValue("eventId", job.eventId().value())
                 .addValue("outcomeVersion", job.outcomeVersion())
-                .addValue("lastBetId", job.lastBetId())
+                .addValue("lastBetId", job.lastBetId() == null ? null : job.lastBetId().value())
                 .addValue("completed", job.completed())
                 .addValue("version", job.version());
     }
 
     private SettlementJob toSettlementJob(ResultSet rs, int rowNum) throws SQLException {
+        val lastBetId = rs.getObject("last_bet_id", UUID.class);
         return new SettlementJob()
-                .id(rs.getObject("id", UUID.class))
-                .eventId(rs.getObject("event_id", UUID.class))
+                .id(new SettlementJobId(rs.getObject("id", UUID.class)))
+                .eventId(new EventId(rs.getObject("event_id", UUID.class)))
                 .outcomeVersion(rs.getInt("outcome_version"))
-                .lastBetId(rs.getObject("last_bet_id", UUID.class))
+                .lastBetId(lastBetId == null ? null : new BetId(lastBetId))
                 .completed(rs.getBoolean("completed"))
                 .version(rs.getInt("version"));
     }

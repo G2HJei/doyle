@@ -7,12 +7,14 @@ import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import xyz.zlatanov.doyle.core.domain.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.EventId;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
 
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Comparator.comparing;
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
@@ -38,7 +40,7 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome = outcome();
         repository.save(outcome);
 
-        repository.save(outcome.eventWinnerId(UUID.randomUUID()));
+        repository.save(outcome.eventWinnerId(new CompetitorId(randomUUID())));
 
         assertEquals(2, outcome.version());
         assertEquals(outcome, repository.findOneByEventId(outcome.eventId()));
@@ -49,7 +51,7 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome = outcome();
         repository.save(outcome);
         val concurrentlyReadOutcome = repository.findOneByEventId(outcome.eventId());
-        repository.save(outcome.eventWinnerId(UUID.randomUUID()));
+        repository.save(outcome.eventWinnerId(new CompetitorId(randomUUID())));
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadOutcome));
     }
@@ -64,7 +66,7 @@ class JdbcEventOutcomeRepositoryTest {
 
     @Test
     void shouldReturnNullForUnknownEvent() {
-        assertNull(repository.findOneByEventId(UUID.randomUUID()));
+        assertNull(repository.findOneByEventId(new EventId(randomUUID())));
     }
 
     @Test
@@ -73,7 +75,7 @@ class JdbcEventOutcomeRepositoryTest {
         outcomes.forEach(repository::save);
         val unpublished = outcomes.stream()
                 .filter(o -> !o.published())
-                .sorted(comparing(EventOutcome::id))
+                .sorted(comparing(o -> o.id().value()))
                 .toList();
 
         assertEquals(unpublished.subList(0, 2), repository.findUnpublished(2));
@@ -97,7 +99,7 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome_2 = outcome();
         List.of(outcome_1, outcome_2).forEach(repository::save);
         val staleOutcome_2 = repository.findOneByEventId(outcome_2.eventId());
-        repository.save(outcome_2.eventWinnerId(UUID.randomUUID()));
+        repository.save(outcome_2.eventWinnerId(new CompetitorId(randomUUID())));
 
         repository.markPublished(List.of(outcome_1, staleOutcome_2));
 
@@ -111,9 +113,9 @@ class JdbcEventOutcomeRepositoryTest {
 
     EventOutcome outcome() {
         return new EventOutcome()
-                .eventId(UUID.randomUUID())
+                .eventId(new EventId(randomUUID()))
                 .eventName("test event")
-                .eventWinnerId(UUID.randomUUID())
+                .eventWinnerId(new CompetitorId(randomUUID()))
                 .published(false);
     }
 }

@@ -28,11 +28,7 @@ public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUse
     }
 
     private void publish(EventOutcome outcome) {
-        publisher.publish(new EventOutcomeMessage()
-                .eventId(outcome.eventId())
-                .eventName(outcome.eventName())
-                .eventWinnerId(outcome.eventWinnerId())
-                .version(outcome.version()));
+        publisher.publish(new EventOutcomeMessage(outcome));
         log.info("Event outcome relayed: eventId={}, outcomeVersion={}", outcome.eventId(), outcome.version());
     }
 }

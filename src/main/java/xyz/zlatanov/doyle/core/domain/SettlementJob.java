@@ -3,16 +3,14 @@ package xyz.zlatanov.doyle.core.domain;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.UUID;
-
 @Data
 @Accessors(fluent = true)
 public class SettlementJob {
 
-    private UUID    id;
-    private UUID    eventId;
-    private int     outcomeVersion;
-    private UUID    lastBetId;
-    private boolean completed;
-    private int     version;
+    private SettlementJobId id;
+    private EventId         eventId;
+    private int             outcomeVersion;
+    private BetId           lastBetId;
+    private boolean         completed;
+    private int             version;
 }

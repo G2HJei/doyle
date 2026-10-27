@@ -53,18 +53,12 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
 
     private void publishBetSettlements(List<Bet> bets) {
         bets.stream()
-                .map(this::toSettlementMessage)
+                .map(BetSettlementMessage::new)
                 .forEach(betSettlementPublisher::publish);
     }
 
     private void updateJobProgress(SettlementJob job, List<Bet> bets) {
         val lastBetId = bets.get(bets.size() - 1).id();
         settlementJobRepository.save(job.lastBetId(lastBetId));
-    }
-
-    private BetSettlementMessage toSettlementMessage(Bet bet) {
-        return new BetSettlementMessage()
-                .betId(bet.id())
-                .userId(bet.userId());
     }
 }

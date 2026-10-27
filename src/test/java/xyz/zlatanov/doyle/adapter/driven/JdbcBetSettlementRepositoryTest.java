@@ -8,13 +8,13 @@ import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.*;
 import xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
 import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PAID_OUT;
@@ -32,10 +32,10 @@ class JdbcBetSettlementRepositoryTest {
     JdbcClient                  jdbcClient;
 
     Bet bet = new Bet()
-            .userId(UUID.randomUUID())
-            .eventId(UUID.randomUUID())
-            .eventMarketId(UUID.randomUUID())
-            .eventWinnerId(UUID.randomUUID())
+            .userId(new UserId(randomUUID()))
+            .eventId(new EventId(randomUUID()))
+            .eventMarketId(new EventMarketId(randomUUID()))
+            .eventWinnerId(new CompetitorId(randomUUID()))
             .amount(new BigDecimal("10.50"))
             .status(PLACED);
 
@@ -84,12 +84,12 @@ class JdbcBetSettlementRepositoryTest {
                 .settledEventVersion(settledEventVersion);
     }
 
-    BetSettlement findById(UUID id) {
+    BetSettlement findById(BetSettlementId id) {
         return jdbcClient.sql("SELECT * FROM bet_settlement WHERE id = :id")
-                .param("id", id)
+                .param("id", id.value())
                 .query((rs, rowNum) -> new BetSettlement()
-                        .id(rs.getObject("id", UUID.class))
-                        .betId(rs.getObject("bet_id", UUID.class))
+                        .id(new BetSettlementId(rs.getObject("id", UUID.class)))
+                        .betId(new BetId(rs.getObject("bet_id", UUID.class)))
                         .deltaAmount(rs.getBigDecimal("delta_amount"))
                         .payoutStatus(PayoutStatus.valueOf(rs.getString("payout_status")))
                         .settledEventVersion(rs.getInt("settled_event_version")))

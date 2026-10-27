@@ -7,16 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
-import xyz.zlatanov.doyle.core.domain.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.*;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementPublisher;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
 import java.util.Arrays;
-import java.util.UUID;
 
+import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static xyz.zlatanov.doyle.core.MatchEventOutcomeToBetsToSettleCommandProcessor.CHUNK_SIZE;
@@ -33,7 +31,7 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
     @InjectMocks
     MatchEventOutcomeToBetsToSettleCommandProcessor commandProcessor;
 
-    SettlementJob settlementJob = new SettlementJob().eventId(UUID.randomUUID());
+    SettlementJob settlementJob = new SettlementJob().eventId(new EventId(randomUUID()));
     Bet           bet           = getBet();
 
     @BeforeEach
@@ -89,9 +87,9 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     Bet getBet() {
         return new Bet()
-                .id(UUID.randomUUID())
+                .id(new BetId(randomUUID()))
                 .eventId(settlementJob.eventId())
-                .userId(UUID.randomUUID());
+                .userId(new UserId(randomUUID()));
     }
 
     void betsToSettle(Bet... bets) {
@@ -111,7 +109,7 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     void verifySettlementsPublished(Bet... bets) {
         for (val b : bets) {
-            verify(publisher).publish(new BetSettlementMessage().betId(b.id()).userId(b.userId()));
+            verify(publisher).publish(new BetSettlementMessage(b));
         }
     }
 }

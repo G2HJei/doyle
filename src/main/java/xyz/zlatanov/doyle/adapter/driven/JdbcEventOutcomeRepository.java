@@ -5,7 +5,10 @@ import lombok.val;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import xyz.zlatanov.doyle.core.domain.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.EventId;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.EventOutcomeId;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
@@ -21,9 +24,9 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     private final UUIDService uuidService;
 
     @Override
-    public EventOutcome findOneByEventId(UUID eventId) {
+    public EventOutcome findOneByEventId(EventId eventId) {
         return jdbcClient.sql("SELECT * FROM event_outcome WHERE event_id = :eventId")
-                .param("eventId", eventId)
+                .param("eventId", eventId.value())
                 .query(this::toEventOutcome)
                 .optional()
                 .orElse(null);
@@ -59,7 +62,7 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
             return; // IN () is not valid SQL
         }
         val idVersions = outcomes.stream()
-                .map(o -> new Object[]{o.id(), o.version()})
+                .map(o -> new Object[]{o.id().value(), o.version()})
                 .toList();
         jdbcClient.sql("UPDATE event_outcome SET published = TRUE WHERE (id, version) IN (:idVersions)")
                 .param("idVersions", idVersions)
@@ -67,7 +70,7 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     }
 
     private void insert(EventOutcome eventOutcome) {
-        eventOutcome.id(uuidService.get()).version(1);
+        eventOutcome.id(new EventOutcomeId(uuidService.get())).version(1);
         jdbcClient.sql("""
                         INSERT INTO event_outcome (id, event_id, event_name, event_winner_id, published, version)
                         VALUES (:id, :eventId, :eventName, :eventWinnerId, :published, :version)
@@ -95,20 +98,20 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
 
     private MapSqlParameterSource params(EventOutcome eventOutcome) {
         return new MapSqlParameterSource()
-                .addValue("id", eventOutcome.id())
-                .addValue("eventId", eventOutcome.eventId())
+                .addValue("id", eventOutcome.id().value())
+                .addValue("eventId", eventOutcome.eventId().value())
                 .addValue("eventName", eventOutcome.eventName())
-                .addValue("eventWinnerId", eventOutcome.eventWinnerId())
+                .addValue("eventWinnerId", eventOutcome.eventWinnerId().value())
                 .addValue("published", eventOutcome.published())
                 .addValue("version", eventOutcome.version());
     }
 
     private EventOutcome toEventOutcome(ResultSet rs, int rowNum) throws SQLException {
         return new EventOutcome()
-                .id(rs.getObject("id", UUID.class))
-                .eventId(rs.getObject("event_id", UUID.class))
+                .id(new EventOutcomeId(rs.getObject("id", UUID.class)))
+                .eventId(new EventId(rs.getObject("event_id", UUID.class)))
                 .eventName(rs.getString("event_name"))
-                .eventWinnerId(rs.getObject("event_winner_id", UUID.class))
+                .eventWinnerId(new CompetitorId(rs.getObject("event_winner_id", UUID.class)))
                 .published(rs.getBoolean("published"))
                 .version(rs.getInt("version"));
     }

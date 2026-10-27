@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import xyz.zlatanov.doyle.core.domain.SeedBetsCommand;
+import xyz.zlatanov.doyle.core.domain.BetId;
+import xyz.zlatanov.doyle.core.domain.EventId;
 import xyz.zlatanov.doyle.core.port.driving.GetEventDataUseCase;
 import xyz.zlatanov.doyle.core.port.driving.SeedBetsUseCase;
 
@@ -27,12 +28,14 @@ public class PocRestController {
 
     @PostMapping("/bets")
     @ResponseStatus(CREATED)
-    public List<UUID> seedBets(@Valid @RequestBody SeedBetsCommand command) {
-        return seedBetsUseCase.seed(command);
+    public List<UUID> seedBets(@Valid @RequestBody SeedBetsRequest request) {
+        return seedBetsUseCase.seed(request.toCommand()).stream()
+                .map(BetId::value)
+                .toList();
     }
 
     @GetMapping("/event-data")
     public Map<String, List<Map<String, Object>>> getEventData(@RequestParam(required = false) UUID eventId) {
-        return getEventDataUseCase.get(eventId);
+        return getEventDataUseCase.get(eventId == null ? null : new EventId(eventId));
     }
 }

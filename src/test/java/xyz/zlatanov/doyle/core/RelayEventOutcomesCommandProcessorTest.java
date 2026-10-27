@@ -6,15 +6,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
-import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
+import xyz.zlatanov.doyle.core.domain.*;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
+import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -29,10 +28,10 @@ class RelayEventOutcomesCommandProcessorTest {
     RelayEventOutcomesCommandProcessor commandProcessor;
 
     EventOutcome outcome_1 = new EventOutcome()
-            .id(UUID.randomUUID())
-            .eventId(UUID.randomUUID())
+            .id(new EventOutcomeId(randomUUID()))
+            .eventId(new EventId(randomUUID()))
             .eventName("test event")
-            .eventWinnerId(UUID.randomUUID())
+            .eventWinnerId(new CompetitorId(randomUUID()))
             .published(false)
             .version(1);
 
@@ -56,11 +55,7 @@ class RelayEventOutcomesCommandProcessorTest {
     }
 
     EventOutcomeMessage expectedMessage(EventOutcome outcome) {
-        return new EventOutcomeMessage()
-                .eventId(outcome.eventId())
-                .eventName(outcome.eventName())
-                .eventWinnerId(outcome.eventWinnerId())
-                .version(outcome.version());
+        return new EventOutcomeMessage(outcome);
     }
 
     void verifyOutboxPublished(EventOutcome outcome) {
