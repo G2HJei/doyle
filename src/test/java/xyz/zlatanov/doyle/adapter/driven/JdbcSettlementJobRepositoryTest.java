@@ -1,27 +1,46 @@
 package xyz.zlatanov.doyle.adapter.driven;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
+import xyz.zlatanov.doyle.core.domain.Bet;
 import xyz.zlatanov.doyle.core.domain.SettlementJob;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.*;
+import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
 
 @JdbcTest
-@Import({ JdbcSettlementJobRepository.class, UuidV7Service.class })
+@Import({ JdbcSettlementJobRepository.class, JdbcBetRepository.class, UuidV7Service.class })
 class JdbcSettlementJobRepositoryTest {
 
     @Autowired
     JdbcSettlementJobRepository repository;
+    @Autowired
+    JdbcBetRepository           betRepository;
 
     UUID eventId = UUID.randomUUID();
+
+    Bet bet = new Bet()
+            .userId(UUID.randomUUID())
+            .eventId(eventId)
+            .eventMarketId(UUID.randomUUID())
+            .eventWinnerId(UUID.randomUUID())
+            .amount(new BigDecimal("10.50"))
+            .status(PLACED);
+
+    @BeforeEach
+    void setUp() {
+        betRepository.save(bet);
+    }
 
     @Test
     void shouldInsertNewJob() {
@@ -81,7 +100,7 @@ class JdbcSettlementJobRepositoryTest {
         val job = job(1);
         repository.save(job);
 
-        repository.save(job.lastBetId(UUID.randomUUID()));
+        repository.save(job.lastBetId(bet.id()));
 
         assertEquals(2, job.version());
         assertEquals(job, repository.nextPending());
@@ -92,7 +111,7 @@ class JdbcSettlementJobRepositoryTest {
         val job = job(1);
         repository.save(job);
         val concurrentlyReadJob = repository.nextPending();
-        repository.save(job.lastBetId(UUID.randomUUID()));
+        repository.save(job.lastBetId(bet.id()));
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadJob.completed(true)));
     }
