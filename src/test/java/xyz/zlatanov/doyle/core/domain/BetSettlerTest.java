@@ -2,6 +2,7 @@ package xyz.zlatanov.doyle.core.domain;
 
 import lombok.val;
 import org.junit.jupiter.api.Test;
+import xyz.zlatanov.doyle.core.BetSettler;
 
 import java.math.BigDecimal;
 import java.util.UUID;

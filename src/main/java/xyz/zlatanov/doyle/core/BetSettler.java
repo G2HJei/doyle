@@ -1,6 +1,9 @@
-package xyz.zlatanov.doyle.core.domain;
+package xyz.zlatanov.doyle.core;
 
+import xyz.zlatanov.doyle.core.domain.Bet;
 import xyz.zlatanov.doyle.core.domain.Bet.BetResult;
+import xyz.zlatanov.doyle.core.domain.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.EventOutcome;
 
 import java.math.BigDecimal;
 import java.util.Objects;

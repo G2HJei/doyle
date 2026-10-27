@@ -2,7 +2,6 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import xyz.zlatanov.doyle.core.domain.BetSettler;
 import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
