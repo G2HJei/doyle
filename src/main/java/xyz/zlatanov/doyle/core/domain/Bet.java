@@ -19,6 +19,7 @@ public class Bet {
     private BetStatus  status;
     private BetResult  result;
     private Integer    settledEventVersion;
+    private int        version;
 
     public enum BetStatus {
         PLACED, SETTLED
