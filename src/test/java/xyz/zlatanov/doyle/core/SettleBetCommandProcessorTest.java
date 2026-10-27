@@ -14,6 +14,7 @@ import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeLookup;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static java.math.BigDecimal.ONE;
@@ -58,7 +59,16 @@ class SettleBetCommandProcessorTest {
             .eventWinnerId(outcome.eventWinnerId())
             .amount(ONE)
             .status(SETTLED)
+            .result(WON)
             .settledEventVersion(1);
+    Bet          correctionBet     = new Bet()
+            .id(UUID.randomUUID())
+            .eventId(outcome.eventId())
+            .eventWinnerId(UUID.randomUUID())
+            .amount(ONE)
+            .status(SETTLED)
+            .result(WON)
+            .settledEventVersion(0);
 
     @BeforeEach
     void setUp() {
@@ -92,9 +102,25 @@ class SettleBetCommandProcessorTest {
     @Test
     void shouldNoOpAlreadySettledBet() {
         when(betRepository.findById(settledWinningBet.id())).thenReturn(settledWinningBet);
+
         commandProcessor.settle(new SettleBetCommand().betId(settledWinningBet.id()));
 
         verify(betRepository, never()).updateStatusAndResult(any(), any(), any());
         verifyNoInteractions(betSettlementRepository);
+    }
+
+    @Test
+    void shouldResettleOnWinnerChanged() {
+        when(betRepository.findById(correctionBet.id())).thenReturn(correctionBet);
+
+        commandProcessor.settle(new SettleBetCommand().betId(correctionBet.id()));
+
+        verify(betRepository).updateStatusAndResult(correctionBet.id(), SETTLED, LOST);
+        verify(betSettlementRepository).save(new BetSettlement()
+                .betId(correctionBet.id())
+                .settledEventVersion(1)
+                .deltaAmount(new BigDecimal("-1"))
+                .payoutStatus(PENDING)
+        );
     }
 }
