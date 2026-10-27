@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
-import xyz.zlatanov.doyle.core.BetSettler.ToSave;
 import xyz.zlatanov.doyle.core.domain.command.SettleBetCommand;
 import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
 import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
@@ -25,26 +25,27 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
     @Override
     //todo SettleBetCommand(s) can be batched to reduce DB queries with one-by-one fallback in case of an error
     public void settle(SettleBetCommand command) {
-        val bet = betRepository.findById(command.betId()).orElseThrow(() -> new IllegalStateException("Bet not found:" + command.betId()));
-        val eventOutcome = eventOutcomeLookup.findOneByEventId(bet.eventId()).orElseThrow(() -> new IllegalStateException("EventOutcome not found:" + bet.eventId()));
-        val toSave = new BetSettler(bet, eventOutcome).settle();
-        if (toSave.bet() != null) {
-            betRepository.save(toSave.bet());
+        val bet = getBet(command);
+        val eventOutcome = getEventOutcome(bet);
+        if (bet.alreadySettledFor(eventOutcome)) {
+            log.info("Bet already settled: betId={}, eventId={}, outcomeVersion={}", bet.id(), bet.eventId(), eventOutcome.version());
+            return;
         }
-        if (toSave.betSettlement() != null) {
-            betSettlementRepository.save(toSave.betSettlement());
-        }
-        logSettlement(bet, eventOutcome, toSave);
+        val payout = bet.settle(eventOutcome);
+        betRepository.save(bet);
+        payout.ifPresent(betSettlementRepository::save);
+
+        log.info("Bet settled: betId={}, eventId={}, outcomeVersion={}, result={}, payout={}",
+                bet.id(), bet.eventId(), eventOutcome.version(), bet.result(), payout.map(BetSettlement::deltaAmount).map(Object::toString).orElse("none"));
     }
 
-    private void logSettlement(Bet bet, EventOutcome eventOutcome, ToSave toSave) {
-        if (toSave.bet() == null) {
-            log.info("Bet already settled: betId={}, eventId={}, outcomeVersion={}",
-                    bet.id(), bet.eventId(), eventOutcome.version());
-        } else {
-            log.info("Bet settled: betId={}, eventId={}, outcomeVersion={}, result={}, payout={}",
-                    bet.id(), bet.eventId(), eventOutcome.version(), toSave.bet().result(),
-                    toSave.betSettlement() == null ? "none" : toSave.betSettlement().deltaAmount());
-        }
+    private Bet getBet(SettleBetCommand command) {
+        return betRepository.findById(command.betId())
+                .orElseThrow(() -> new IllegalStateException("Bet not found:" + command.betId()));
+    }
+
+    private EventOutcome getEventOutcome(Bet bet) {
+        return eventOutcomeLookup.findOneByEventId(bet.eventId())
+                .orElseThrow(() -> new IllegalStateException("EventOutcome not found:" + bet.eventId()));
     }
 }

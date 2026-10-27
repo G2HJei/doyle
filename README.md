@@ -14,6 +14,43 @@ _Named after the legendary poker player Doyle Brunson (1933-2023)._
 Once Doyle is running, its REST API will be accessible
 at [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html).
 
+## Using Doyle
+
+Bets are placed outside Doyle, so the `/poc` endpoints seed test bets and inspect stored data. Data lives in an
+in-memory H2 database and is lost on restart. The same calls can be made from the Swagger UI.
+
+1. Seed bets on an event. All `createCount` bets share the template; seed again with another `eventWinnerId` for
+   losing bets. Returns the created bet ids.
+   ```sh
+   curl -X POST localhost:8080/poc/bets -H 'Content-Type: application/json' -d '{
+     "template": {
+       "userId":        "00000000-0000-0000-0000-000000000001",
+       "eventId":       "00000000-0000-0000-0000-0000000000e1",
+       "eventMarketId": "00000000-0000-0000-0000-0000000000a1",
+       "eventWinnerId": "00000000-0000-0000-0000-0000000000c1",
+       "amount":        10.00
+     },
+     "createCount": 3
+   }'
+   ```
+2. Publish the event outcome. Answers `202 Accepted`; bets are settled asynchronously within seconds.
+   ```sh
+   curl -X POST localhost:8080/event-outcomes -H 'Content-Type: application/json' -d '{
+     "eventId":       "00000000-0000-0000-0000-0000000000e1",
+     "eventName":     "Real Madrid CF vs FC Barcelona",
+     "eventWinnerId": "00000000-0000-0000-0000-0000000000c1"
+   }'
+   ```
+3. Inspect the event's `event_outcome`, `bet`, `bet_settlement` and `settlement_job` rows. Omit `eventId` to list all
+   events.
+   ```sh
+   curl 'localhost:8080/poc/event-data?eventId=00000000-0000-0000-0000-0000000000e1'
+   ```
+   Bets on the winner are `SETTLED`/`WON` with a `bet_settlement` paying out their amount. The rest are
+   `SETTLED`/`LOST` with no payout.
+4. To correct the winner, publish the outcome again with a different `eventWinnerId`. The outcome version increments
+   and the bets are resettled: revoked wins get a negative payout, new wins a positive one.
+
 ## Testing
 
 - `mvn test` runs the unit tests.
