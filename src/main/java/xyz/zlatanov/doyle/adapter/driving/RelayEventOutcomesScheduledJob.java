@@ -9,7 +9,7 @@ public class RelayEventOutcomesScheduledJob {
 
     private final RelayEventOutcomesUseCase relayEventOutcomesUseCase;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelayString = "${doyle.outcome-relay.fixed-delay}")
     public void run() {
         relayEventOutcomesUseCase.relayOutcomes();
     }

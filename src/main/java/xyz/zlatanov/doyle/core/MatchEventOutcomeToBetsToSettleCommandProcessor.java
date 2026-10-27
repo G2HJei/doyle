@@ -18,11 +18,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEventOutcomeToBetsToSettleUseCase {
 
-    static final int CHUNK_SIZE = 1000;
-
     private final SettlementJobRepository settlementJobRepository;
     private final BetRepository           betRepository;
     private final BetSettlementPublisher  betSettlementPublisher;
+    private final int                     chunkSize;
 
     @Transactional
     @Override
@@ -46,7 +45,7 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
     }
 
     private List<Bet> getBetsToSettle(SettlementJob job) {
-        return betRepository.findByEventIdAndAfterIdAndLimit(job.eventId(), job.lastBetId(), CHUNK_SIZE);
+        return betRepository.findByEventIdAndAfterIdAndLimit(job.eventId(), job.lastBetId(), chunkSize);
     }
 
     private void completeJob(SettlementJob job) {

@@ -10,16 +10,15 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class MatchEventOutcomeToBetsToSettleScheduledJob {
 
-    private final static Duration MAX_RUN_TIME = Duration.ofSeconds(1);
-
     private final MatchEventOutcomeToBetsToSettleUseCase useCase;
+    private final Duration                               maxRunTime;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelayString = "${doyle.bet-matching.fixed-delay}")
     public void run() {
         val start = System.nanoTime();
         boolean moreToMatch;
         do {
             moreToMatch = useCase.match(); // a chunk per call, each in its own transaction
-        } while (moreToMatch && System.nanoTime() - start < MAX_RUN_TIME.toNanos());
+        } while (moreToMatch && System.nanoTime() - start < maxRunTime.toNanos());
     }
 }

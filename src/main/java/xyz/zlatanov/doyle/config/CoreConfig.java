@@ -1,5 +1,6 @@
 package xyz.zlatanov.doyle.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import xyz.zlatanov.doyle.core.*;
@@ -16,8 +17,9 @@ public class CoreConfig {
 
     @Bean
     RelayEventOutcomesUseCase relayEventOutcomesUseCase(EventOutcomeRepository eventOutcomeRepository,
-                                                        EventOutcomePublisher eventOutcomePublisher) {
-        return new RelayEventOutcomesCommandProcessor(eventOutcomeRepository, eventOutcomePublisher);
+                                                        EventOutcomePublisher eventOutcomePublisher,
+                                                        @Value("${doyle.outcome-relay.chunk-size}") int chunkSize) {
+        return new RelayEventOutcomesCommandProcessor(eventOutcomeRepository, eventOutcomePublisher, chunkSize);
     }
 
     @Bean
@@ -29,9 +31,10 @@ public class CoreConfig {
     MatchEventOutcomeToBetsToSettleUseCase matchEventOutcomeToBetsToSettleUseCase(
             SettlementJobRepository settlementJobRepository,
             BetRepository betRepository,
-            BetSettlementPublisher betSettlementPublisher) {
+            BetSettlementPublisher betSettlementPublisher,
+            @Value("${doyle.bet-matching.chunk-size}") int chunkSize) {
         return new MatchEventOutcomeToBetsToSettleCommandProcessor(settlementJobRepository, betRepository,
-                betSettlementPublisher);
+                betSettlementPublisher, chunkSize);
     }
 
     @Bean

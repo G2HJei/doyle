@@ -4,7 +4,6 @@ import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.entity.Bet;
@@ -25,10 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static xyz.zlatanov.doyle.core.MatchEventOutcomeToBetsToSettleCommandProcessor.CHUNK_SIZE;
 
 @ExtendWith(MockitoExtension.class)
 class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
+
+    static final int CHUNK_SIZE = 10;
 
     @Mock
     SettlementJobRepository                         settlementJobRepository;
@@ -36,7 +36,6 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
     BetRepository                                   betRepository;
     @Mock
     BetSettlementPublisher                          publisher;
-    @InjectMocks
     MatchEventOutcomeToBetsToSettleCommandProcessor commandProcessor;
 
     SettlementJob settlementJob = new SettlementJob().eventId(new EventId(randomUUID()));
@@ -44,6 +43,8 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     @BeforeEach
     void setUp() {
+        commandProcessor = new MatchEventOutcomeToBetsToSettleCommandProcessor(settlementJobRepository, betRepository,
+                publisher, CHUNK_SIZE);
         when(settlementJobRepository.nextPending()).thenReturn(Optional.of(settlementJob));
     }
 

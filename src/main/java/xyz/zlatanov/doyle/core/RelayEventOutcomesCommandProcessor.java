@@ -14,15 +14,14 @@ import xyz.zlatanov.doyle.core.port.driving.RelayEventOutcomesUseCase;
 @RequiredArgsConstructor
 public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUseCase {
 
-    private static final int CHUNK_SIZE = 1000;
-
     private final EventOutcomeRepository outcomeRepository;
     private final EventOutcomePublisher  publisher;
+    private final int                    chunkSize;
 
     @Transactional
     @Override
     public void relayOutcomes() {
-        val outcomes = outcomeRepository.findUnpublished(CHUNK_SIZE);
+        val outcomes = outcomeRepository.findUnpublished(chunkSize);
         outcomes.forEach(this::publish);
         outcomeRepository.markPublished(outcomes);
     }

@@ -14,7 +14,7 @@ public class KafkaEventOutcomeListener {
 
     private final ConsumeEventOutcomeUseCase consumeEventOutcomeUseCase;
 
-    @KafkaListener(topics = EVENT_OUTCOMES_TOPIC, concurrency = "3")
+    @KafkaListener(topics = EVENT_OUTCOMES_TOPIC)
     public void consume(EventOutcomeMessage outcome) {
         consumeEventOutcomeUseCase.consumeOutcome(new ConsumeEventOutcomeCommand()
                 .eventId(new EventId(outcome.eventId()))

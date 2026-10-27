@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
@@ -18,6 +19,7 @@ import xyz.zlatanov.doyle.core.domain.message.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 
 @Slf4j
@@ -28,23 +30,22 @@ public class KafkaConfig {
     public static final String DLT_SUFFIX               = "-dlt";
     public static final String EVENT_OUTCOMES_DLT_TOPIC = EVENT_OUTCOMES_TOPIC + DLT_SUFFIX;
 
-    private static final int    MAX_RETRIES                  = 3;
-    private static final long   INITIAL_RETRY_BACKOFF_MILLIS = 1000;
-    private static final double RETRY_BACKOFF_MULTIPLIER     = 2;
-
     @Bean
-    NewTopic eventOutcomesTopic() {
-        return getTopic(EVENT_OUTCOMES_TOPIC);
+    NewTopic eventOutcomesTopic(@Value("${doyle.kafka.topic-partitions}") int partitions,
+                                @Value("${doyle.kafka.topic-replicas}") int replicas) {
+        return getTopic(EVENT_OUTCOMES_TOPIC, partitions, replicas);
     }
 
     @Bean
-    NewTopic eventOutcomesDeadLetterTopic() {
-        return getTopic(EVENT_OUTCOMES_DLT_TOPIC);
+    NewTopic eventOutcomesDeadLetterTopic(@Value("${doyle.kafka.topic-partitions}") int partitions,
+                                          @Value("${doyle.kafka.topic-replicas}") int replicas) {
+        return getTopic(EVENT_OUTCOMES_DLT_TOPIC, partitions, replicas);
     }
 
     @Bean
-    EventOutcomePublisher eventOutcomePublisher(KafkaTemplate<String, EventOutcomeMessage> kafkaTemplate) {
-        return new KafkaEventOutcomePublisher(kafkaTemplate, EVENT_OUTCOMES_TOPIC);
+    EventOutcomePublisher eventOutcomePublisher(KafkaTemplate<String, EventOutcomeMessage> kafkaTemplate,
+                                                @Value("${doyle.kafka.send-timeout}") Duration sendTimeout) {
+        return new KafkaEventOutcomePublisher(kafkaTemplate, EVENT_OUTCOMES_TOPIC, sendTimeout);
     }
 
     @Bean
@@ -53,22 +54,26 @@ public class KafkaConfig {
     }
 
     @Bean
-    DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, EventOutcomeMessage> kafkaTemplate) {
-        val errorHandler = getErrorHandler(kafkaTemplate);
+    DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, EventOutcomeMessage> kafkaTemplate,
+                                          @Value("${doyle.kafka.retry.max-retries}") int maxRetries,
+                                          @Value("${doyle.kafka.retry.initial-backoff}") Duration initialBackoff,
+                                          @Value("${doyle.kafka.retry.backoff-multiplier}") double backoffMultiplier) {
+        val errorHandler = getErrorHandler(kafkaTemplate, maxRetries, initialBackoff, backoffMultiplier);
         errorHandler.setRetryListeners(new LoggingRetryListener());
         return errorHandler;
     }
 
-    private NewTopic getTopic(String eventOutcomesTopic) {
+    private NewTopic getTopic(String eventOutcomesTopic, int partitions, int replicas) {
         return TopicBuilder.name(eventOutcomesTopic)
-                .partitions(3)
-                .replicas(1)
+                .partitions(partitions)
+                .replicas(replicas)
                 .build();
     }
 
-    private DefaultErrorHandler getErrorHandler(KafkaTemplate<String, EventOutcomeMessage> kafkaTemplate) {
-        val backOff = new ExponentialBackOff(INITIAL_RETRY_BACKOFF_MILLIS, RETRY_BACKOFF_MULTIPLIER);
-        backOff.setMaxAttempts(MAX_RETRIES);
+    private DefaultErrorHandler getErrorHandler(KafkaTemplate<String, EventOutcomeMessage> kafkaTemplate,
+                                                int maxRetries, Duration initialBackoff, double backoffMultiplier) {
+        val backOff = new ExponentialBackOff(initialBackoff.toMillis(), backoffMultiplier);
+        backOff.setMaxAttempts(maxRetries);
 
         val templates = new LinkedHashMap<Class<?>, KafkaOperations<?, ?>>();
         templates.put(Object.class, kafkaTemplate);

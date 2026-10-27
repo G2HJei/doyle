@@ -43,13 +43,15 @@ public class RocketMqConfig {
 
     // consume from the first offset so settlements sent before this group first subscribed are not skipped
     @Bean(initMethod = "start", destroyMethod = "shutdown")
-    DefaultMQPushConsumer betSettlementConsumer(@Value("${doyle.rocketmq.name-server}") String nameServer, RocketMqBetSettlementListener listener) throws MQClientException {
+    DefaultMQPushConsumer betSettlementConsumer(@Value("${doyle.rocketmq.name-server}") String nameServer,
+                                                @Value("${doyle.rocketmq.max-reconsume-times}") int maxReconsumeTimes,
+                                                RocketMqBetSettlementListener listener) throws MQClientException {
         val consumer = new DefaultMQPushConsumer(CONSUMER_GROUP);
         consumer.setNamesrvAddr(nameServer);
         consumer.setConsumeFromWhere(CONSUME_FROM_FIRST_OFFSET);
         consumer.subscribe(BET_SETTLEMENTS_TOPIC, "*");
         consumer.registerMessageListener(listener);
-        consumer.setMaxReconsumeTimes(3);
+        consumer.setMaxReconsumeTimes(maxReconsumeTimes);
         return consumer;
     }
 }

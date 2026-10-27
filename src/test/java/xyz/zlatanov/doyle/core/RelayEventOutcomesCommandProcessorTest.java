@@ -1,9 +1,9 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
@@ -24,11 +24,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class RelayEventOutcomesCommandProcessorTest {
 
+    static final int CHUNK_SIZE = 10;
+
     @Mock
     EventOutcomeRepository             outcomeRepository;
     @Mock
     EventOutcomePublisher              publisher;
-    @InjectMocks
     RelayEventOutcomesCommandProcessor commandProcessor;
 
     EventOutcome outcome_1 = new EventOutcome()
@@ -38,6 +39,11 @@ class RelayEventOutcomesCommandProcessorTest {
             .eventWinnerId(new CompetitorId(randomUUID()))
             .published(false)
             .version(1);
+
+    @BeforeEach
+    void setUp() {
+        commandProcessor = new RelayEventOutcomesCommandProcessor(outcomeRepository, publisher, CHUNK_SIZE);
+    }
 
     @Test
     void shouldDoNothingWhenNoUnpublished() {
@@ -54,7 +60,7 @@ class RelayEventOutcomesCommandProcessorTest {
     }
 
     void unpublishedEventOutcomes(EventOutcome... outcomes) {
-        when(outcomeRepository.findUnpublished(anyInt()))
+        when(outcomeRepository.findUnpublished(CHUNK_SIZE))
                 .thenReturn(Arrays.stream(outcomes).toList());
     }
 
