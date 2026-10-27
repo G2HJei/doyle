@@ -90,9 +90,11 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     void verifyJobCompleted(boolean completed) {
         if (completed) {
-            verify(settlementJobRepository).markCompleted(settlementJob.id());
+            verify(settlementJobRepository).save(new SettlementJob()
+                    .eventId(settlementJob.eventId())
+                    .completed(true));
         } else {
-            verify(settlementJobRepository, never()).markCompleted(any());
+            verify(settlementJobRepository, never()).save(argThat(SettlementJob::completed));
         }
     }
 

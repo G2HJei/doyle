@@ -29,7 +29,7 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
         }
         val bets = getBetsToSettle(job);
         if (bets.isEmpty()) {
-            settlementJobRepository.markCompleted(job.id());
+            settlementJobRepository.save(job.completed(true));
         } else {
             settle(bets);
         }

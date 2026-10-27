@@ -14,7 +14,6 @@ public class ConsumeEventOutcomeService implements ConsumeEventOutcomeUseCase {
 
     @Override
     public void consumeOutcome(EventOutcomeMessage outcomeMsg) {
-        // todo repeated outcome message for the same event version to be deduped in the repository
         val settlementJob = toSettlementJob(outcomeMsg);
         settlementJobRepository.save(settlementJob);
     }
