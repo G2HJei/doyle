@@ -26,12 +26,12 @@ public class JdbcBetRepository implements BetRepository {
 
     @Override
     public List<Bet> findByEventIdAndAfterIdAndLimit(EventId eventId, BetId afterId, int limit) {
-        return jdbcClient.sql("""
-                        SELECT * FROM bet
-                        WHERE event_id = :eventId AND (CAST(:afterId AS UUID) IS NULL OR id > :afterId)
-                        ORDER BY id
-                        LIMIT :limit
-                        """)
+        // a separate "id >" condition and ordering by all of bet_event_id_id_idx let H2 seek to afterId and stop at the limit
+        return jdbcClient.sql("SELECT * FROM bet " +
+                        "WHERE event_id = :eventId " +
+                        (afterId == null ? "" : "AND id > :afterId ") +
+                        "ORDER BY event_id, id " +
+                        "LIMIT :limit")
                 .param("eventId", eventId.value())
                 .param("afterId", afterId == null ? null : afterId.value())
                 .param("limit", limit)

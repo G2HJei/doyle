@@ -1,14 +1,13 @@
 CREATE TABLE event_outcome
 (
     id              UUID PRIMARY KEY,
-    event_id        UUID         NOT NULL UNIQUE,
+    event_id        UUID         NOT NULL,
     event_name      VARCHAR(255) NOT NULL,
     event_winner_id UUID         NOT NULL,
     published       BOOLEAN      NOT NULL,
     version         INT          NOT NULL,
     UNIQUE (event_id)
 );
-CREATE INDEX event_outcome_event_id_idx ON event_outcome (event_id);
 CREATE INDEX event_outcome_published_id_idx ON event_outcome (published, id);
 
 CREATE TABLE bet
@@ -41,7 +40,7 @@ CREATE TABLE settlement_job
     id              UUID PRIMARY KEY,
     event_id        UUID    NOT NULL,
     outcome_version INT     NOT NULL,
-    last_bet_id     UUID    REFERENCES bet (id),
+    last_bet_id     UUID REFERENCES bet (id),
     completed       BOOLEAN NOT NULL,
     version         INT     NOT NULL,
     UNIQUE (event_id, outcome_version)
