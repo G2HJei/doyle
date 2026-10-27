@@ -57,7 +57,8 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
                             """)
                     .paramSource(params(job).addValue("id", id.value()).addValue("version", 1))
                     .update();
-            job.id(id).version(1);
+            job.assignId(id);
+            job.incrementVersion(); // stored as version 1
         } catch (DuplicateKeyException e) {
             // unique (event_id, outcome_version): a repeated outcome message doesn't create another job
             log.info("Settlement job already exists: eventId={}, outcomeVersion={}", job.eventId(), job.outcomeVersion());
@@ -78,7 +79,7 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
             throw new OptimisticLockingFailureException(
                     "SettlementJob %s with version %d not found".formatted(job.id(), job.version()));
         }
-        job.version(job.version() + 1);
+        job.incrementVersion();
     }
 
     private MapSqlParameterSource params(SettlementJob job) {
@@ -93,12 +94,13 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
 
     private SettlementJob toSettlementJob(ResultSet rs, int rowNum) throws SQLException {
         val lastBetId = rs.getObject("last_bet_id", UUID.class);
-        return new SettlementJob()
+        return SettlementJob.restore()
                 .id(new SettlementJobId(rs.getObject("id", UUID.class)))
                 .eventId(new EventId(rs.getObject("event_id", UUID.class)))
                 .outcomeVersion(rs.getInt("outcome_version"))
                 .lastBetId(lastBetId == null ? null : new BetId(lastBetId))
                 .completed(rs.getBoolean("completed"))
-                .version(rs.getInt("version"));
+                .version(rs.getInt("version"))
+                .build();
     }
 }

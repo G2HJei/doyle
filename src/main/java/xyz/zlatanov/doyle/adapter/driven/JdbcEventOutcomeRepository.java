@@ -75,7 +75,8 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     }
 
     private void insert(EventOutcome eventOutcome) {
-        eventOutcome.id(new EventOutcomeId(uuidService.get())).version(1);
+        eventOutcome.assignId(new EventOutcomeId(uuidService.get()));
+        eventOutcome.incrementVersion(); // stored as version 1
         jdbcClient.sql("""
                         INSERT INTO event_outcome (id, event_id, event_name, event_winner_id, published, version)
                         VALUES (:id, :eventId, :eventName, :eventWinnerId, :published, :version)
@@ -98,7 +99,7 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
             throw new OptimisticLockingFailureException(
                     "EventOutcome %s with version %d not found".formatted(eventOutcome.id(), eventOutcome.version()));
         }
-        eventOutcome.version(eventOutcome.version() + 1);
+        eventOutcome.incrementVersion();
     }
 
     private MapSqlParameterSource params(EventOutcome eventOutcome) {
@@ -112,12 +113,13 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     }
 
     private EventOutcome toEventOutcome(ResultSet rs, int rowNum) throws SQLException {
-        return new EventOutcome()
+        return EventOutcome.restore()
                 .id(new EventOutcomeId(rs.getObject("id", UUID.class)))
                 .eventId(new EventId(rs.getObject("event_id", UUID.class)))
                 .eventName(rs.getString("event_name"))
                 .eventWinnerId(new CompetitorId(rs.getObject("event_winner_id", UUID.class)))
                 .published(rs.getBoolean("published"))
-                .version(rs.getInt("version"));
+                .version(rs.getInt("version"))
+                .build();
     }
 }

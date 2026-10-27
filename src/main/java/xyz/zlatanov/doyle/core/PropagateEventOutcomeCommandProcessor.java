@@ -18,16 +18,8 @@ public class PropagateEventOutcomeCommandProcessor implements PropagateEventOutc
     @Transactional
     @Override
     public void consumeOutcome(ConsumeEventOutcomeCommand command) {
-        val settlementJob = toSettlementJob(command);
+        val settlementJob = SettlementJob.create(command.eventId(), command.outcomeVersion());
         settlementJobRepository.save(settlementJob);
         log.info("Event outcome consumed: eventId={}, outcomeVersion={}", command.eventId(), command.outcomeVersion());
-    }
-
-    private SettlementJob toSettlementJob(ConsumeEventOutcomeCommand command) {
-        return new SettlementJob()
-                .eventId(command.eventId())
-                .outcomeVersion(command.outcomeVersion())
-                .lastBetId(null)
-                .completed(false);
     }
 }

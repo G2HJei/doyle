@@ -41,7 +41,8 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome = outcome();
         repository.save(outcome);
 
-        repository.save(outcome.eventWinnerId(new CompetitorId(randomUUID())));
+        outcome.correct(outcome.eventName(), new CompetitorId(randomUUID()));
+        repository.save(outcome);
 
         assertEquals(2, outcome.version());
         assertEquals(Optional.of(outcome), repository.findOneByEventId(outcome.eventId()));
@@ -52,7 +53,8 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome = outcome();
         repository.save(outcome);
         val concurrentlyReadOutcome = repository.findOneByEventId(outcome.eventId()).orElseThrow();
-        repository.save(outcome.eventWinnerId(new CompetitorId(randomUUID())));
+        outcome.correct(outcome.eventName(), new CompetitorId(randomUUID()));
+        repository.save(outcome);
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadOutcome));
     }
@@ -62,7 +64,7 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome = outcome();
         repository.save(outcome);
 
-        assertThrows(DuplicateKeyException.class, () -> repository.save(outcome().eventId(outcome.eventId())));
+        assertThrows(DuplicateKeyException.class, () -> repository.save(outcome(outcome.eventId())));
     }
 
     @Test
@@ -72,7 +74,7 @@ class JdbcEventOutcomeRepositoryTest {
 
     @Test
     void shouldFindUnpublishedOrderedByIdUpToLimit() {
-        val outcomes = List.of(outcome(), outcome().published(true), outcome(), outcome());
+        val outcomes = List.of(outcome(), outcome().toBuilder().published(true).build(), outcome(), outcome());
         outcomes.forEach(repository::save);
         val unpublished = outcomes.stream()
                 .filter(o -> !o.published())
@@ -91,7 +93,8 @@ class JdbcEventOutcomeRepositoryTest {
         repository.markPublished(List.of(outcome_1));
 
         assertEquals(List.of(outcome_2), repository.findUnpublished(10));
-        assertEquals(Optional.of(outcome_1.published(true)), repository.findOneByEventId(outcome_1.eventId()));
+        assertEquals(Optional.of(outcome_1.toBuilder().published(true).build()),
+                repository.findOneByEventId(outcome_1.eventId()));
     }
 
     @Test
@@ -100,7 +103,8 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome_2 = outcome();
         List.of(outcome_1, outcome_2).forEach(repository::save);
         val staleOutcome_2 = repository.findOneByEventId(outcome_2.eventId()).orElseThrow();
-        repository.save(outcome_2.eventWinnerId(new CompetitorId(randomUUID())));
+        outcome_2.correct(outcome_2.eventName(), new CompetitorId(randomUUID()));
+        repository.save(outcome_2);
 
         repository.markPublished(List.of(outcome_1, staleOutcome_2));
 
@@ -113,10 +117,10 @@ class JdbcEventOutcomeRepositoryTest {
     }
 
     EventOutcome outcome() {
-        return new EventOutcome()
-                .eventId(new EventId(randomUUID()))
-                .eventName("test event")
-                .eventWinnerId(new CompetitorId(randomUUID()))
-                .published(false);
+        return outcome(new EventId(randomUUID()));
+    }
+
+    EventOutcome outcome(EventId eventId) {
+        return EventOutcome.create(eventId, "test event", new CompetitorId(randomUUID()));
     }
 }

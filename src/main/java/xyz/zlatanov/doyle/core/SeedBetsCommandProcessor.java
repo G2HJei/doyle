@@ -12,8 +12,6 @@ import xyz.zlatanov.doyle.core.port.driving.SeedBetsUseCase;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
-
 @RequiredArgsConstructor
 public class SeedBetsCommandProcessor implements SeedBetsUseCase {
 
@@ -30,12 +28,7 @@ public class SeedBetsCommandProcessor implements SeedBetsUseCase {
     }
 
     private Bet toBet(BetTemplate template) {
-        return new Bet()
-                .userId(template.userId())
-                .eventId(template.eventId())
-                .eventMarketId(template.eventMarketId())
-                .eventWinnerId(template.eventWinnerId())
-                .amount(template.amount())
-                .status(PLACED);
+        return Bet.place(template.userId(), template.eventId(), template.eventMarketId(), template.eventWinnerId(),
+                template.amount());
     }
 }

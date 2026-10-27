@@ -26,9 +26,10 @@ class ConsumeEventOutcomeCommandProcessorTest {
     @Test
     void shouldCreateSettlementJob() {
         service.consumeOutcome(command);
-        verify(settlementJobRepository).save(new SettlementJob()
+        verify(settlementJobRepository).save(SettlementJob.restore()
                 .eventId(command.eventId())
-                .outcomeVersion(command.outcomeVersion()));
+                .outcomeVersion(command.outcomeVersion())
+                .build());
     }
 
 }

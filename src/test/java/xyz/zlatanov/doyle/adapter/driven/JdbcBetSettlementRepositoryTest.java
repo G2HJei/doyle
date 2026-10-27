@@ -18,9 +18,7 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PAID_OUT;
-import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PENDING;
 
 @JdbcTest
 @Import({JdbcBetSettlementRepository.class, JdbcBetRepository.class, UuidV7Provider.class})
@@ -33,13 +31,8 @@ class JdbcBetSettlementRepositoryTest {
     @Autowired
     JdbcClient                  jdbcClient;
 
-    Bet bet = new Bet()
-            .userId(new UserId(randomUUID()))
-            .eventId(new EventId(randomUUID()))
-            .eventMarketId(new EventMarketId(randomUUID()))
-            .eventWinnerId(new CompetitorId(randomUUID()))
-            .amount(new BigDecimal("10.50"))
-            .status(PLACED);
+    Bet bet = Bet.place(new UserId(randomUUID()), new EventId(randomUUID()), new EventMarketId(randomUUID()),
+            new CompetitorId(randomUUID()), new BigDecimal("10.50"));
 
     @BeforeEach
     void setUp() {
@@ -60,10 +53,11 @@ class JdbcBetSettlementRepositoryTest {
     void shouldUpdateExistingSettlement() {
         val settlement = settlement(1);
         repository.save(settlement);
+        val paidOutSettlement = settlement.toBuilder().payoutStatus(PAID_OUT).build();
 
-        repository.save(settlement.payoutStatus(PAID_OUT));
+        repository.save(paidOutSettlement);
 
-        assertEquals(settlement, findById(settlement.id()));
+        assertEquals(paidOutSettlement, findById(settlement.id()));
     }
 
     @Test
@@ -79,22 +73,19 @@ class JdbcBetSettlementRepositoryTest {
     }
 
     BetSettlement settlement(int settledEventVersion) {
-        return new BetSettlement()
-                .betId(bet.id())
-                .deltaAmount(bet.amount())
-                .payoutStatus(PENDING)
-                .settledEventVersion(settledEventVersion);
+        return BetSettlement.create(bet.id(), bet.amount(), settledEventVersion);
     }
 
     BetSettlement findById(BetSettlementId id) {
         return jdbcClient.sql("SELECT * FROM bet_settlement WHERE id = :id")
                 .param("id", id.value())
-                .query((rs, rowNum) -> new BetSettlement()
+                .query((rs, rowNum) -> BetSettlement.restore()
                         .id(new BetSettlementId(rs.getObject("id", UUID.class)))
                         .betId(new BetId(rs.getObject("bet_id", UUID.class)))
                         .deltaAmount(rs.getBigDecimal("delta_amount"))
                         .payoutStatus(PayoutStatus.valueOf(rs.getString("payout_status")))
-                        .settledEventVersion(rs.getInt("settled_event_version")))
+                        .settledEventVersion(rs.getInt("settled_event_version"))
+                        .build())
                 .single();
     }
 }

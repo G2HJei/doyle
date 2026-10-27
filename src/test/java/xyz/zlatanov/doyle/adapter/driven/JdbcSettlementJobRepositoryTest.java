@@ -21,7 +21,6 @@ import java.util.Optional;
 import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 
 @JdbcTest
 @Import({JdbcSettlementJobRepository.class, JdbcBetRepository.class, UuidV7Provider.class})
@@ -34,13 +33,8 @@ class JdbcSettlementJobRepositoryTest {
 
     EventId eventId = new EventId(randomUUID());
 
-    Bet bet = new Bet()
-            .userId(new UserId(randomUUID()))
-            .eventId(eventId)
-            .eventMarketId(new EventMarketId(randomUUID()))
-            .eventWinnerId(new CompetitorId(randomUUID()))
-            .amount(new BigDecimal("10.50"))
-            .status(PLACED);
+    Bet bet = Bet.place(new UserId(randomUUID()), eventId, new EventMarketId(randomUUID()),
+            new CompetitorId(randomUUID()), new BigDecimal("10.50"));
 
     @BeforeEach
     void setUp() {
@@ -67,7 +61,8 @@ class JdbcSettlementJobRepositoryTest {
         repository.save(repeatedJob);
 
         assertNull(repeatedJob.id());
-        repository.save(job.completed(true));
+        job.complete();
+        repository.save(job);
         assertEquals(Optional.empty(), repository.nextPending());
     }
 
@@ -78,7 +73,8 @@ class JdbcSettlementJobRepositoryTest {
         repository.save(job);
         repository.save(nextVersionJob);
 
-        repository.save(job.completed(true));
+        job.complete();
+        repository.save(job);
 
         assertEquals(Optional.of(nextVersionJob), repository.nextPending());
     }
@@ -90,7 +86,8 @@ class JdbcSettlementJobRepositoryTest {
 
         for (val job : jobs.stream().sorted(comparing(j -> j.id().value())).toList()) {
             assertEquals(Optional.of(job), repository.nextPending());
-            repository.save(job.completed(true));
+            job.complete();
+            repository.save(job);
         }
         assertEquals(Optional.empty(), repository.nextPending());
     }
@@ -105,7 +102,8 @@ class JdbcSettlementJobRepositoryTest {
         val job = job(1);
         repository.save(job);
 
-        repository.save(job.lastBetId(bet.id()));
+        job.recordProgress(bet.id());
+        repository.save(job);
 
         assertEquals(2, job.version());
         assertEquals(Optional.of(job), repository.nextPending());
@@ -116,14 +114,14 @@ class JdbcSettlementJobRepositoryTest {
         val job = job(1);
         repository.save(job);
         val concurrentlyReadJob = repository.nextPending().orElseThrow();
-        repository.save(job.lastBetId(bet.id()));
+        job.recordProgress(bet.id());
+        repository.save(job);
+        concurrentlyReadJob.complete();
 
-        assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadJob.completed(true)));
+        assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadJob));
     }
 
     SettlementJob job(int outcomeVersion) {
-        return new SettlementJob()
-                .eventId(eventId)
-                .outcomeVersion(outcomeVersion);
+        return SettlementJob.create(eventId, outcomeVersion);
     }
 }

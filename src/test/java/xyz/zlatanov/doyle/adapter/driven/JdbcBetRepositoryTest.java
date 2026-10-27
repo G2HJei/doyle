@@ -7,6 +7,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
 import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.id.*;
 
 import java.math.BigDecimal;
@@ -16,9 +17,6 @@ import java.util.Optional;
 import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.WON;
-import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
-import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.SETTLED;
 
 @JdbcTest
 @Import({JdbcBetRepository.class, UuidV7Provider.class})
@@ -45,7 +43,8 @@ class JdbcBetRepositoryTest {
         val bet = bet(eventId);
         repository.save(bet);
 
-        repository.save(bet.status(SETTLED).result(WON).settledEventVersion(1));
+        bet.settle(winningOutcome(bet));
+        repository.save(bet);
 
         assertEquals(2, bet.version());
         assertEquals(Optional.of(bet), repository.findById(bet.id()));
@@ -56,7 +55,8 @@ class JdbcBetRepositoryTest {
         val bet = bet(eventId);
         repository.save(bet);
         val concurrentlyReadBet = repository.findById(bet.id()).orElseThrow();
-        repository.save(bet.status(SETTLED).result(WON).settledEventVersion(1));
+        bet.settle(winningOutcome(bet));
+        repository.save(bet);
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadBet));
     }
@@ -82,12 +82,15 @@ class JdbcBetRepositoryTest {
     }
 
     Bet bet(EventId eventId) {
-        return new Bet()
-                .userId(new UserId(randomUUID()))
-                .eventId(eventId)
-                .eventMarketId(new EventMarketId(randomUUID()))
-                .eventWinnerId(new CompetitorId(randomUUID()))
-                .amount(new BigDecimal("10.50"))
-                .status(PLACED);
+        return Bet.place(new UserId(randomUUID()), eventId, new EventMarketId(randomUUID()),
+                new CompetitorId(randomUUID()), new BigDecimal("10.50"));
+    }
+
+    EventOutcome winningOutcome(Bet bet) {
+        return EventOutcome.restore()
+                .eventId(bet.eventId())
+                .eventWinnerId(bet.eventWinnerId())
+                .version(1)
+                .build();
     }
 }

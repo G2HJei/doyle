@@ -32,13 +32,14 @@ class RelayEventOutcomesCommandProcessorTest {
     EventOutcomePublisher              publisher;
     RelayEventOutcomesCommandProcessor commandProcessor;
 
-    EventOutcome outcome_1 = new EventOutcome()
+    EventOutcome outcome_1 = EventOutcome.restore()
             .id(new EventOutcomeId(randomUUID()))
             .eventId(new EventId(randomUUID()))
             .eventName("test event")
             .eventWinnerId(new CompetitorId(randomUUID()))
             .published(false)
-            .version(1);
+            .version(1)
+            .build();
 
     @BeforeEach
     void setUp() {

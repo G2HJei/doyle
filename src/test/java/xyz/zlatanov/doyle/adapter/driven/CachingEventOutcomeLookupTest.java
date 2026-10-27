@@ -25,12 +25,13 @@ class CachingEventOutcomeLookupTest {
     @Autowired
     EventOutcomeLookup     lookup;
 
-    EventOutcome outcome = new EventOutcome()
+    EventOutcome outcome = EventOutcome.restore()
             .eventId(new EventId(randomUUID()))
             .eventName("test event")
             .eventWinnerId(new CompetitorId(randomUUID()))
             .published(false)
-            .version(1);
+            .version(1)
+            .build();
 
     @Test
     void shouldLoadOutcomeOnceAndServeItFromCache() {

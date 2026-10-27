@@ -49,7 +49,8 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
     }
 
     private void completeJob(SettlementJob job) {
-        settlementJobRepository.save(job.completed(true));
+        job.complete();
+        settlementJobRepository.save(job);
     }
 
     private void publishBetSettlements(List<Bet> bets) {
@@ -60,6 +61,7 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
 
     private void updateJobProgress(SettlementJob job, List<Bet> bets) {
         val lastBetId = bets.get(bets.size() - 1).id();
-        settlementJobRepository.save(job.lastBetId(lastBetId));
+        job.recordProgress(lastBetId);
+        settlementJobRepository.save(job);
     }
 }

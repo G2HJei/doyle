@@ -1,22 +1,25 @@
 package xyz.zlatanov.doyle.core.domain.entity;
 
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.Accessors;
-import lombok.val;
 import xyz.zlatanov.doyle.core.domain.id.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
+import static lombok.AccessLevel.PRIVATE;
 import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.LOST;
 import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.WON;
 import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.SETTLED;
-import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PENDING;
 
-@Data
+@Getter
 @Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+@Builder(builderMethodName = "restore", toBuilder = true) // restores stored bets; new ones are placed
+@AllArgsConstructor(access = PRIVATE)
 public class Bet {
 
     // Odds aren't in the model; assume fixed decimal odds of 2.0 (even money):
@@ -34,6 +37,18 @@ public class Bet {
     private BetResult     result;
     private Integer       settledEventVersion;
     private int           version;
+
+    public static Bet place(UserId userId, EventId eventId, EventMarketId eventMarketId, CompetitorId eventWinnerId,
+                            BigDecimal amount) {
+        return new BetBuilder()
+                .userId(userId)
+                .eventId(eventId)
+                .eventMarketId(eventMarketId)
+                .eventWinnerId(eventWinnerId)
+                .amount(amount)
+                .status(PLACED)
+                .build();
+    }
 
     public boolean alreadySettledFor(EventOutcome eventOutcome) {
         return settledEventVersion != null && settledEventVersion >= eventOutcome.version();
@@ -56,6 +71,15 @@ public class Bet {
         return payout;
     }
 
+    public void assignId(BetId id) {
+        assert this.id == null : "Bet already has an id";
+        this.id = id;
+    }
+
+    public void incrementVersion() {
+        version++;
+    }
+
     private BetResult resultFor(EventOutcome eventOutcome) {
         return Objects.equals(eventWinnerId, eventOutcome.eventWinnerId()) ? WON : LOST;
     }
@@ -64,11 +88,7 @@ public class Bet {
         if (!resultChanges(newResult) || lostOnFirstSettle(newResult)) {
             return Optional.empty(); // nothing to pay out
         }
-        return Optional.of(new BetSettlement()
-                .betId(id)
-                .settledEventVersion(eventOutcome.version())
-                .deltaAmount(deltaAmount(newResult))
-                .payoutStatus(PENDING));
+        return Optional.of(BetSettlement.create(id, deltaAmount(newResult), eventOutcome.version()));
     }
 
     private boolean resultChanges(BetResult newResult) {

@@ -57,7 +57,8 @@ public class JdbcBetRepository implements BetRepository {
     }
 
     private void insert(Bet bet) {
-        bet.id(new BetId(uuidService.get())).version(1);
+        bet.assignId(new BetId(uuidService.get()));
+        bet.incrementVersion(); // stored as version 1
         jdbcClient.sql("""
                         INSERT INTO bet (id, user_id, event_id, event_market_id, event_winner_id, amount,
                                          status, result, settled_event_version, version)
@@ -83,7 +84,7 @@ public class JdbcBetRepository implements BetRepository {
             throw new OptimisticLockingFailureException(
                     "Bet %s with version %d not found".formatted(bet.id(), bet.version()));
         }
-        bet.version(bet.version() + 1);
+        bet.incrementVersion();
     }
 
     private MapSqlParameterSource params(Bet bet) {
@@ -102,7 +103,7 @@ public class JdbcBetRepository implements BetRepository {
 
     private Bet toBet(ResultSet rs, int rowNum) throws SQLException {
         val result = rs.getString("result");
-        return new Bet()
+        return Bet.restore()
                 .id(new BetId(rs.getObject("id", UUID.class)))
                 .userId(new UserId(rs.getObject("user_id", UUID.class)))
                 .eventId(new EventId(rs.getObject("event_id", UUID.class)))
@@ -112,6 +113,7 @@ public class JdbcBetRepository implements BetRepository {
                 .status(BetStatus.valueOf(rs.getString("status")))
                 .result(result == null ? null : BetResult.valueOf(result))
                 .settledEventVersion(rs.getObject("settled_event_version", Integer.class))
-                .version(rs.getInt("version"));
+                .version(rs.getInt("version"))
+                .build();
     }
 }

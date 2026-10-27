@@ -26,7 +26,7 @@ public class JdbcBetSettlementRepository implements BetSettlementRepository {
     }
 
     private void insert(BetSettlement betSettlement) {
-        betSettlement.id(new BetSettlementId(uuidService.get()));
+        betSettlement.assignId(new BetSettlementId(uuidService.get()));
         jdbcClient.sql("""
                         INSERT INTO bet_settlement (id, bet_id, delta_amount, payout_status, settled_event_version)
                         VALUES (:id, :betId, :deltaAmount, :payoutStatus, :settledEventVersion)

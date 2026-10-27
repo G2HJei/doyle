@@ -38,7 +38,7 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
     BetSettlementPublisher                          publisher;
     MatchEventOutcomeToBetsToSettleCommandProcessor commandProcessor;
 
-    SettlementJob settlementJob = new SettlementJob().eventId(new EventId(randomUUID()));
+    SettlementJob settlementJob = SettlementJob.restore().eventId(new EventId(randomUUID())).build();
     Bet           bet           = getBet();
 
     @BeforeEach
@@ -108,16 +108,18 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
         betsToSettle(bet);
         commandProcessor.match();
         verify(settlementJobRepository).save(
-                new SettlementJob()
+                SettlementJob.restore()
                         .eventId(settlementJob.eventId())
-                        .lastBetId(bet.id()));
+                        .lastBetId(bet.id())
+                        .build());
     }
 
     Bet getBet() {
-        return new Bet()
+        return Bet.restore()
                 .id(new BetId(randomUUID()))
                 .eventId(settlementJob.eventId())
-                .userId(new UserId(randomUUID()));
+                .userId(new UserId(randomUUID()))
+                .build();
     }
 
     void betsToSettle(Bet... bets) {
@@ -127,9 +129,10 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     void verifyJobCompleted(boolean completed) {
         if (completed) {
-            verify(settlementJobRepository).save(new SettlementJob()
+            verify(settlementJobRepository).save(SettlementJob.restore()
                     .eventId(settlementJob.eventId())
-                    .completed(true));
+                    .completed(true)
+                    .build());
         } else {
             verify(settlementJobRepository, never()).save(argThat(SettlementJob::completed));
         }

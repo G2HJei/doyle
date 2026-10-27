@@ -22,10 +22,11 @@ class BetTest {
 
     BigDecimal TWO = BigDecimal.valueOf(2);
 
-    EventOutcome outcome = new EventOutcome()
+    EventOutcome outcome = EventOutcome.restore()
             .eventId(new EventId(randomUUID()))
             .eventWinnerId(new CompetitorId(randomUUID()))
-            .version(1);
+            .version(1)
+            .build();
 
     @Test
     void shouldSettleBetAsLost() {
@@ -93,14 +94,15 @@ class BetTest {
     }
 
     Bet bet(CompetitorId eventWinnerId, Bet.BetStatus status, Bet.BetResult result, Integer settledEventVersion) {
-        return new Bet()
+        return Bet.restore()
                 .id(new BetId(randomUUID()))
                 .eventId(outcome.eventId())
                 .eventWinnerId(eventWinnerId)
                 .amount(ONE)
                 .status(status)
                 .result(result)
-                .settledEventVersion(settledEventVersion);
+                .settledEventVersion(settledEventVersion)
+                .build();
     }
 
     Bet expectedBet(Bet bet, Bet.BetResult result) {
@@ -108,24 +110,20 @@ class BetTest {
     }
 
     Bet expectedBet(Bet bet, Bet.BetResult result, int settledEventVersion) {
-        return new Bet()
-                .id(bet.id())
-                .userId(bet.userId())
-                .eventId(bet.eventId())
-                .eventMarketId(bet.eventMarketId())
-                .eventWinnerId(bet.eventWinnerId())
-                .amount(bet.amount())
+        return bet.toBuilder()
                 .status(SETTLED)
                 .result(result)
-                .settledEventVersion(settledEventVersion);
+                .settledEventVersion(settledEventVersion)
+                .build();
     }
 
     BetSettlement expectedSettlement(Bet bet, BigDecimal amount) {
-        return new BetSettlement()
+        return BetSettlement.restore()
                 .betId(bet.id())
                 .settledEventVersion(1)
                 .deltaAmount(amount)
-                .payoutStatus(PENDING);
+                .payoutStatus(PENDING)
+                .build();
     }
 
     void assertResult(Bet expectedBet, BetSettlement expectedSettlement, Bet actualBet, @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<BetSettlement> actualPayout) {

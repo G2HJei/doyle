@@ -31,7 +31,7 @@ class PublishEventOutcomeCommandProcessorTest {
     @Test
     void shouldPublishNewEventOutcome() {
         service.publish(command);
-        verify(repository).save(eventOutcome(null));
+        verify(repository).save(eventOutcome(0));
     }
 
     @Test
@@ -53,16 +53,17 @@ class PublishEventOutcomeCommandProcessorTest {
         verify(repository).save(eventOutcome(1));
     }
 
-    EventOutcome eventOutcome(Integer version) {
+    EventOutcome eventOutcome(int version) {
         return eventOutcome(version, command.eventWinnerId());
     }
 
-    EventOutcome eventOutcome(Integer version, CompetitorId winnerId) {
-        return new EventOutcome()
+    EventOutcome eventOutcome(int version, CompetitorId winnerId) {
+        return EventOutcome.restore()
                 .eventId(command.eventId())
                 .eventName(command.eventName())
                 .eventWinnerId(winnerId)
                 .published(false)
-                .version(version);
+                .version(version)
+                .build();
     }
 }
