@@ -23,7 +23,7 @@ import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.P
 import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PENDING;
 
 @JdbcTest
-@Import({JdbcBetSettlementRepository.class, JdbcBetRepository.class, UuidV7Service.class})
+@Import({JdbcBetSettlementRepository.class, JdbcBetRepository.class, UuidV7Provider.class})
 class JdbcBetSettlementRepositoryTest {
 
     @Autowired

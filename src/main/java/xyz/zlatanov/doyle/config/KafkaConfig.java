@@ -17,7 +17,7 @@ import xyz.zlatanov.doyle.adapter.driven.KafkaEventOutcomePublisher;
 import xyz.zlatanov.doyle.adapter.driving.KafkaEventOutcomeListener;
 import xyz.zlatanov.doyle.core.domain.message.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
-import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
+import xyz.zlatanov.doyle.core.port.driving.PropagateEventOutcomeUseCase;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -49,8 +49,8 @@ public class KafkaConfig {
     }
 
     @Bean
-    KafkaEventOutcomeListener kafkaEventOutcomeListener(ConsumeEventOutcomeUseCase consumeEventOutcomeUseCase) {
-        return new KafkaEventOutcomeListener(consumeEventOutcomeUseCase);
+    KafkaEventOutcomeListener kafkaEventOutcomeListener(PropagateEventOutcomeUseCase propagateEventOutcomeUseCase) {
+        return new KafkaEventOutcomeListener(propagateEventOutcomeUseCase);
     }
 
     @Bean

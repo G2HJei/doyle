@@ -2,11 +2,11 @@ package xyz.zlatanov.doyle.adapter.driven;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
-import xyz.zlatanov.doyle.core.port.driven.UUIDService;
+import xyz.zlatanov.doyle.core.port.driven.UUIDProvider;
 
 import java.util.UUID;
 
-public class UuidV7Service implements UUIDService {
+public class UuidV7Provider implements UUIDProvider {
 
     private final NoArgGenerator generator = Generators.timeBasedEpochRandomGenerator();
 

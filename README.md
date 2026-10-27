@@ -4,17 +4,15 @@ _Named after the legendary poker player Doyle Brunson (1933-2023)._
 
 ## Running The App
 
-> Requires Java 17 (or later), Maven and Docker.
+> Requires Java 17 (or later) and Docker.
 
 1. `docker compose up -d` deploys the Kafka and RocketMQ infrastructure.
-2. `./mvnw spring-boot:run` runs Doyle
+2. `./mvnw spring-boot:run` runs Doyle (`mvnw.cmd` on Windows)
 
-## Doyle REST API
+## Using Doyle
 
 Once Doyle is running, its REST API will be accessible
 at [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html).
-
-## Using Doyle
 
 Bets are placed outside Doyle, so the `/poc` endpoints seed test bets and inspect stored data. Data lives in an
 in-memory H2 database and is lost on restart. The same calls can be made from the Swagger UI.
@@ -53,18 +51,33 @@ in-memory H2 database and is lost on restart. The same calls can be made from th
 
 ## Testing
 
-- `mvn test` runs the unit tests.
-- `mvn test -Dtest=BetSettlementAcceptanceTest` runs the acceptance tests.
+- `./mvnw test` runs the unit tests.
+- `./mvnw test -Dtest=BetSettlementAcceptanceTest` runs the acceptance tests.
+
+## Workflow
+
+I split the development in two parts which put me above the timeframe of the task.
+
+1. Manual TDD driving the core design, allowing me to gain domain knowledge.
+2. An AI-assisted scaffolding and featuring with manual review and corrections.
 
 ## Assumptions & Decisions
 
+- Markets and odds aren't in the model due to limited outcome data and time constraints.
 - Assumed the market is always based on the winner of the event.
-- Odds aren't in the model; assume fixed decimal odds of 2.0 (even money) so a win pays out twice the stake
-- and revoking a win (WON -> LOST) charges back that full payout.
+- Assumed fixed decimal odds of 2.0 (even money) so a win pays out twice the stake and revoking a win (WON → LOST)
+  charges back that full payout.
+
 
 - Bet settlement always uses the latest outcome data for the event to settle against.
 - Split the publishing outcome use case to track event outcome versions in case of winner correction at a later point
   (error, VAR decision, etc.) resulting in a second outbox
+- Decided to import `@Transactional` directly into core logic since the outbox it supports is in practice part of the
+  business logic.
+- Omitted version history as auditability is not the focus of the task
+- Added pessimistic locking and caching as they were inexpensive to do and allow replacing H2 with a durable database
+  and horizontal scaling.
+- Created a POC endpoint with a fake use case to support testing through the REST API.
 
 ## Architecture overview
 
@@ -119,7 +132,7 @@ Event outcome message consumer dedupes messages on database level using the idem
 a no-op. Then creates `settlement job` for chunked matching of bets to settle.
 
 The settlement job uses pessimistic lock to allow scaling. It forms an outbox of matched bets for settling sent to
-`bet-settlements`. It also leverages UIUD v7 ordering to track the end of the current chunk.
+`bet-settlements`. It also leverages UUIDv7 ordering to track the end of the current chunk.
 
-Bet settlements are _partitioned_ by `user id` so that a user's bets is always settled in order, including settlement
-corrections. Redelivery of older settlement messages are no-op.
+Bet settlements are _partitioned_ by `user id` so that a user's bets are always settled in order, including settlement
+corrections. Redelivery of older settlement messages is a no-op.

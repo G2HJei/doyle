@@ -7,11 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.command.ConsumeEventOutcomeCommand;
 import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
-import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
+import xyz.zlatanov.doyle.core.port.driving.PropagateEventOutcomeUseCase;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ConsumeEventOutcomeCommandProcessor implements ConsumeEventOutcomeUseCase {
+public class PropagateEventOutcomeCommandProcessor implements PropagateEventOutcomeUseCase {
 
     private final SettlementJobRepository settlementJobRepository;
 

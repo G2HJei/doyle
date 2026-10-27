@@ -19,7 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
-@Import({JdbcEventOutcomeRepository.class, UuidV7Service.class})
+@Import({JdbcEventOutcomeRepository.class, UuidV7Provider.class})
 class JdbcEventOutcomeRepositoryTest {
 
     @Autowired

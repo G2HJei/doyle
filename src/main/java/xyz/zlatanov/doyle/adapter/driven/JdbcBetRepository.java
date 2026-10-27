@@ -10,7 +10,7 @@ import xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult;
 import xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus;
 import xyz.zlatanov.doyle.core.domain.id.*;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
-import xyz.zlatanov.doyle.core.port.driven.UUIDService;
+import xyz.zlatanov.doyle.core.port.driven.UUIDProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,8 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JdbcBetRepository implements BetRepository {
 
-    private final JdbcClient  jdbcClient;
-    private final UUIDService uuidService;
+    private final JdbcClient   jdbcClient;
+    private final UUIDProvider uuidService;
 
     @Override
     public List<Bet> findByEventIdAndAfterIdAndLimit(EventId eventId, BetId afterId, int limit) {

@@ -21,7 +21,7 @@ import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.SETTLED;
 
 @JdbcTest
-@Import({JdbcBetRepository.class, UuidV7Service.class})
+@Import({JdbcBetRepository.class, UuidV7Provider.class})
 class JdbcBetRepositoryTest {
 
     @Autowired

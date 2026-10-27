@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 
 @JdbcTest
-@Import({JdbcSettlementJobRepository.class, JdbcBetRepository.class, UuidV7Service.class})
+@Import({JdbcSettlementJobRepository.class, JdbcBetRepository.class, UuidV7Provider.class})
 class JdbcSettlementJobRepositoryTest {
 
     @Autowired

@@ -10,22 +10,22 @@ import xyz.zlatanov.doyle.core.port.driven.*;
 public class PersistenceConfig {
 
     @Bean
-    UUIDService uuidService() {
-        return new UuidV7Service();
+    UUIDProvider uuidService() {
+        return new UuidV7Provider();
     }
 
     @Bean
-    BetRepository betRepository(JdbcClient jdbcClient, UUIDService uuidService) {
+    BetRepository betRepository(JdbcClient jdbcClient, UUIDProvider uuidService) {
         return new JdbcBetRepository(jdbcClient, uuidService);
     }
 
     @Bean
-    BetSettlementRepository betSettlementRepository(JdbcClient jdbcClient, UUIDService uuidService) {
+    BetSettlementRepository betSettlementRepository(JdbcClient jdbcClient, UUIDProvider uuidService) {
         return new JdbcBetSettlementRepository(jdbcClient, uuidService);
     }
 
     @Bean
-    EventOutcomeRepository eventOutcomeRepository(JdbcClient jdbcClient, UUIDService uuidService) {
+    EventOutcomeRepository eventOutcomeRepository(JdbcClient jdbcClient, UUIDProvider uuidService) {
         return new JdbcEventOutcomeRepository(jdbcClient, uuidService);
     }
 
@@ -35,7 +35,7 @@ public class PersistenceConfig {
     }
 
     @Bean
-    SettlementJobRepository settlementJobRepository(JdbcClient jdbcClient, UUIDService uuidService) {
+    SettlementJobRepository settlementJobRepository(JdbcClient jdbcClient, UUIDProvider uuidService) {
         return new JdbcSettlementJobRepository(jdbcClient, uuidService);
     }
 

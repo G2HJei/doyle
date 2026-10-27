@@ -17,9 +17,9 @@ import static org.mockito.Mockito.verify;
 class ConsumeEventOutcomeCommandProcessorTest {
 
     @Mock
-    SettlementJobRepository    settlementJobRepository;
+    SettlementJobRepository               settlementJobRepository;
     @InjectMocks
-    ConsumeEventOutcomeCommandProcessor service;
+    PropagateEventOutcomeCommandProcessor service;
 
     ConsumeEventOutcomeCommand command = new ConsumeEventOutcomeCommand(new EventId(randomUUID()), -1);
 

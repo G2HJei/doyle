@@ -8,13 +8,13 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
 import xyz.zlatanov.doyle.core.domain.id.BetSettlementId;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
-import xyz.zlatanov.doyle.core.port.driven.UUIDService;
+import xyz.zlatanov.doyle.core.port.driven.UUIDProvider;
 
 @RequiredArgsConstructor
 public class JdbcBetSettlementRepository implements BetSettlementRepository {
 
-    private final JdbcClient  jdbcClient;
-    private final UUIDService uuidService;
+    private final JdbcClient   jdbcClient;
+    private final UUIDProvider uuidService;
 
     @Override
     public void save(BetSettlement betSettlement) {

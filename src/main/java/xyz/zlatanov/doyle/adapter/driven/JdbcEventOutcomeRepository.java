@@ -11,7 +11,7 @@ import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
 import xyz.zlatanov.doyle.core.domain.id.EventId;
 import xyz.zlatanov.doyle.core.domain.id.EventOutcomeId;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
-import xyz.zlatanov.doyle.core.port.driven.UUIDService;
+import xyz.zlatanov.doyle.core.port.driven.UUIDProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,8 +24,8 @@ import static xyz.zlatanov.doyle.adapter.driven.CachingEventOutcomeLookup.EVENT_
 @RequiredArgsConstructor
 public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
 
-    private final JdbcClient  jdbcClient;
-    private final UUIDService uuidService;
+    private final JdbcClient   jdbcClient;
+    private final UUIDProvider uuidService;
 
     @Override
     public Optional<EventOutcome> findOneByEventId(EventId eventId) {

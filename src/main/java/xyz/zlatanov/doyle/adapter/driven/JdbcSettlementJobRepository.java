@@ -12,7 +12,7 @@ import xyz.zlatanov.doyle.core.domain.id.BetId;
 import xyz.zlatanov.doyle.core.domain.id.EventId;
 import xyz.zlatanov.doyle.core.domain.id.SettlementJobId;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
-import xyz.zlatanov.doyle.core.port.driven.UUIDService;
+import xyz.zlatanov.doyle.core.port.driven.UUIDProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,8 +23,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JdbcSettlementJobRepository implements SettlementJobRepository {
 
-    private final JdbcClient  jdbcClient;
-    private final UUIDService uuidService;
+    private final JdbcClient   jdbcClient;
+    private final UUIDProvider uuidService;
 
     @Override
     public void save(SettlementJob job) {
