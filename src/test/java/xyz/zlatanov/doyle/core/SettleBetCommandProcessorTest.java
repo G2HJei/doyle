@@ -119,7 +119,7 @@ class SettleBetCommandProcessorTest {
         verify(betSettlementRepository).save(new BetSettlement()
                 .betId(correctionBet.id())
                 .settledEventVersion(1)
-                .deltaAmount(new BigDecimal("-1"))
+                .deltaAmount(new BigDecimal("-2"))
                 .payoutStatus(PENDING)
         );
     }
