@@ -49,6 +49,7 @@ public class RocketMqConfig {
         consumer.setConsumeFromWhere(CONSUME_FROM_FIRST_OFFSET);
         consumer.subscribe(BET_SETTLEMENTS_TOPIC, "*");
         consumer.registerMessageListener(listener);
+        consumer.setMaxReconsumeTimes(3);
         return consumer;
     }
 }

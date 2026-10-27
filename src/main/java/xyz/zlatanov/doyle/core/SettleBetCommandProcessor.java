@@ -23,12 +23,11 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
 
     @Transactional
     @Override
-    //todo SettleBetCommand(s) can be batched to reduce to 4 DB queries with one-by-one fallback in case of an error
+    //todo SettleBetCommand(s) can be batched to reduce DB queries with one-by-one fallback in case of an error
     public void settle(SettleBetCommand command) {
         val bet = betRepository.findById(command.betId());
-        val eventOutcome = eventOutcomeRepository.findOneByEventId(bet.eventId());
+        val eventOutcome = eventOutcomeRepository.findOneByEventId(bet.eventId()); // todo can be cached
         val toSave = new BetSettler(bet, eventOutcome).settle();
-        //todo extract transactional outbox to reduce transaction time
         if (toSave.bet() != null) {
             betRepository.save(toSave.bet());
         }
