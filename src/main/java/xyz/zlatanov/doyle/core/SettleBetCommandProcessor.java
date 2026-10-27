@@ -34,21 +34,25 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
         if (outcomeAlreadySettled(bet, eventOutcome)) {
             return;
         }
+        val firstSettle = PLACED == bet.status();
         val won = Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId());
-        val result = won ? WON : LOST;
-        val resultChanged = result == bet.result();
-        betRepository.updateSettlementData(bet.id(), SETTLED, result, eventOutcome.version());
-        if (!won && PLACED == bet.status()) {
+        val oldResult = bet.result();
+        val newResult = won ? WON : LOST;
+        val resultChanged = newResult != bet.result();
+        betRepository.save(bet
+                .status(SETTLED)
+                .result(newResult)
+                .settledEventVersion(eventOutcome.version()));
+        if (firstSettle && !won) {
             return; // nothing to pay out
         }
         if (resultChanged) {
-            return; // result unchanged, already settled
+            betSettlementRepository.save(new BetSettlement()
+                    .betId(bet.id())
+                    .settledEventVersion(eventOutcome.version())
+                    .deltaAmount(deltaAmount(oldResult, newResult, bet.amount()))
+                    .payoutStatus(PENDING));
         }
-        betSettlementRepository.save(new BetSettlement()
-                .betId(bet.id())
-                .settledEventVersion(eventOutcome.version())
-                .deltaAmount(deltaAmount(bet, won))
-                .payoutStatus(PENDING));
     }
 
     private boolean outcomeAlreadySettled(Bet bet, EventOutcome eventOutcome) {
@@ -56,8 +60,8 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
     }
 
     // odds not included in the model, so assumption is the odds are always 2 and the bet amount is equal to the payout
-    private BigDecimal deltaAmount(Bet bet, boolean won) {
-        val revokedWin = !won && WON == bet.result();
-        return revokedWin ? bet.amount().multiply(new BigDecimal("-2")) : bet.amount();
+    private BigDecimal deltaAmount(Bet.BetResult oldResult, Bet.BetResult newResult, BigDecimal amount) {
+        val revokedWin = LOST == newResult && WON == oldResult;
+        return revokedWin ? amount.multiply(new BigDecimal("-2")) : amount;
     }
 }
