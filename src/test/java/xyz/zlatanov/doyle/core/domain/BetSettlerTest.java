@@ -1,42 +1,21 @@
-package xyz.zlatanov.doyle.core;
+package xyz.zlatanov.doyle.core.domain;
 
-import org.junit.jupiter.api.BeforeEach;
+import lombok.val;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.BetSettlement;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
-import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
-import xyz.zlatanov.doyle.core.port.driven.BetRepository;
-import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
-import xyz.zlatanov.doyle.core.port.driven.EventOutcomeLookup;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static java.math.BigDecimal.ONE;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.LOST;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.WON;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
 import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PENDING;
 
-@ExtendWith(MockitoExtension.class)
-class SettleBetCommandProcessorTest {
-
-    @Mock
-    EventOutcomeLookup      eventOutcomeLookup;
-    @Mock
-    BetRepository           betRepository;
-    @Mock
-    BetSettlementRepository betSettlementRepository;
-
-    @InjectMocks
-    SettleBetCommandProcessor commandProcessor;
+class BetSettlerTest {
 
     EventOutcome outcome             = new EventOutcome()
             .eventId(UUID.randomUUID())
@@ -94,93 +73,72 @@ class SettleBetCommandProcessorTest {
             .result(LOST)
             .settledEventVersion(0);
 
-    @BeforeEach
-    void setUp() {
-        when(eventOutcomeLookup.getEventOutcome(outcome.eventId())).thenReturn(outcome);
-    }
-
     @Test
     void shouldSettleBetAsLost() {
-        when(betRepository.findById(losingBet.id())).thenReturn(losingBet);
+        val toSave = new BetSettler(losingBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(losingBet.id()));
-
-        verify(betRepository).save(expected(losingBet, LOST, 1));
-        verifyNoInteractions(betSettlementRepository);
+        assertEquals(expected(losingBet, LOST, 1), toSave.bet());
+        assertNull(toSave.betSettlement());
     }
 
     @Test
     void shouldSettleWinningBet() {
-        when(betRepository.findById(winningBet.id())).thenReturn(winningBet);
+        val toSave = new BetSettler(winningBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(winningBet.id()));
-
-        verify(betRepository).save(expected(winningBet, WON, 1));
-        verify(betSettlementRepository).save(new BetSettlement()
+        assertEquals(expected(winningBet, WON, 1), toSave.bet());
+        assertEquals(new BetSettlement()
                 .betId(winningBet.id())
                 .settledEventVersion(1)
                 .deltaAmount(ONE)
-                .payoutStatus(PENDING));
+                .payoutStatus(PENDING), toSave.betSettlement());
     }
 
     @Test
     void shouldNoOpAlreadySettledBet() {
-        when(betRepository.findById(settledWinningBet.id())).thenReturn(settledWinningBet);
+        val toSave = new BetSettler(settledWinningBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(settledWinningBet.id()));
-
-        verify(betRepository, never()).save(any());
-        verifyNoInteractions(betSettlementRepository);
+        assertNull(toSave.bet());
+        assertNull(toSave.betSettlement());
     }
 
     @Test
     void shouldResettleOnWinnerChanged() {
-        when(betRepository.findById(correctionBet.id())).thenReturn(correctionBet);
+        val toSave = new BetSettler(correctionBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(correctionBet.id()));
-
-        verify(betRepository).save(expected(correctionBet, LOST, 1));
-        verify(betSettlementRepository).save(new BetSettlement()
+        assertEquals(expected(correctionBet, LOST, 1), toSave.bet());
+        assertEquals(new BetSettlement()
                 .betId(correctionBet.id())
                 .settledEventVersion(1)
                 .deltaAmount(new BigDecimal("-1"))
-                .payoutStatus(PENDING)
-        );
+                .payoutStatus(PENDING), toSave.betSettlement());
     }
 
     @Test
     void shouldSettleOnWinnerChanged() {
-        when(betRepository.findById(correctionLosingBet.id())).thenReturn(correctionLosingBet);
+        val toSave = new BetSettler(correctionLosingBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(correctionLosingBet.id()));
-
-        verify(betRepository).save(expected(correctionLosingBet, WON, 1));
-        verify(betSettlementRepository).save(new BetSettlement()
+        assertEquals(expected(correctionLosingBet, WON, 1), toSave.bet());
+        assertEquals(new BetSettlement()
                 .betId(correctionLosingBet.id())
                 .settledEventVersion(1)
                 .deltaAmount(ONE)
-                .payoutStatus(PENDING)
-        );
+                .payoutStatus(PENDING), toSave.betSettlement());
     }
 
     @Test
     void shouldNotPayOutAgainOnUnchangedWinner() {
-        when(betRepository.findById(outdatedWinningBet.id())).thenReturn(outdatedWinningBet);
+        val toSave = new BetSettler(outdatedWinningBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(outdatedWinningBet.id()));
-
-        verify(betRepository).save(expected(outdatedWinningBet, WON, 1));
-        verifyNoInteractions(betSettlementRepository);
+        assertEquals(expected(outdatedWinningBet, WON, 1), toSave.bet());
+        assertNull(toSave.betSettlement());
     }
 
     @Test
     void shouldNotPayOutOnUnchangedLoss() {
-        when(betRepository.findById(outdatedLosingBet.id())).thenReturn(outdatedLosingBet);
+        val toSave = new BetSettler(outdatedLosingBet, outcome).settle();
 
-        commandProcessor.settle(new SettleBetCommand().betId(outdatedLosingBet.id()));
-
-        verify(betRepository).save(expected(outdatedLosingBet, LOST, 1));
-        verifyNoInteractions(betSettlementRepository);
+        assertEquals(expected(outdatedLosingBet, LOST, 1), toSave.bet());
+        assertNull(toSave.betSettlement());
     }
 
     Bet expected(Bet bet, Bet.BetResult result, int settledEventVersion) {
