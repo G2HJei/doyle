@@ -3,16 +3,8 @@ package xyz.zlatanov.doyle.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.adapter.driven.JdbcBetRepository;
-import xyz.zlatanov.doyle.adapter.driven.JdbcBetSettlementRepository;
-import xyz.zlatanov.doyle.adapter.driven.JdbcEventOutcomeRepository;
-import xyz.zlatanov.doyle.adapter.driven.JdbcSettlementJobRepository;
-import xyz.zlatanov.doyle.adapter.driven.UuidV7Service;
-import xyz.zlatanov.doyle.core.port.driven.BetRepository;
-import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
-import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
-import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
-import xyz.zlatanov.doyle.core.port.driven.UUIDService;
+import xyz.zlatanov.doyle.adapter.driven.*;
+import xyz.zlatanov.doyle.core.port.driven.*;
 
 @Configuration
 public class PersistenceConfig {
@@ -40,5 +32,10 @@ public class PersistenceConfig {
     @Bean
     SettlementJobRepository settlementJobRepository(JdbcClient jdbcClient, UUIDService uuidService) {
         return new JdbcSettlementJobRepository(jdbcClient, uuidService);
+    }
+
+    @Bean
+    EventDataRepository eventDataRepository(JdbcClient jdbcClient) {
+        return new JdbcEventDataRepository(jdbcClient);
     }
 }

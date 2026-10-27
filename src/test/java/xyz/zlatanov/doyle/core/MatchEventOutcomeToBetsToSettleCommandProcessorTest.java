@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static xyz.zlatanov.doyle.core.MatchEventOutcomeToBetsToSettleCommandProcessor.CHUNK_SIZE;
 
 @ExtendWith(MockitoExtension.class)
 class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
@@ -94,7 +95,7 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
     }
 
     void betsToSettle(Bet... bets) {
-        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, 100))
+        when(betRepository.findByEventIdAndAfterIdAndLimit(settlementJob.eventId(), null, CHUNK_SIZE))
                 .thenReturn(Arrays.stream(bets).toList());
     }
 

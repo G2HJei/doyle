@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEventOutcomeToBetsToSettleUseCase {
 
-    private static final int CHUNK_SIZE = 100;
+    static final int CHUNK_SIZE = 2;
 
     private final SettlementJobRepository settlementJobRepository;
     private final BetRepository           betRepository;
