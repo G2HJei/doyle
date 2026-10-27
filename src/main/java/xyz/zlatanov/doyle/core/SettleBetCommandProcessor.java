@@ -34,12 +34,13 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
             return; // already settled against this outcome version
         }
         val won = Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId());
-        betRepository.updateSettlementData(bet.id(), SETTLED, won ? WON : LOST, eventOutcome.version());
+        val result = won ? WON : LOST;
+        betRepository.updateSettlementData(bet.id(), SETTLED, result, eventOutcome.version());
         if (!won && PLACED == bet.status()) {
             return; // nothing to pay out
         }
-        if (won && WON == bet.result()) {
-            return; // already paid out
+        if (result == bet.result()) {
+            return; // result unchanged, already settled
         }
         betSettlementRepository.save(new BetSettlement()
                 .betId(bet.id())

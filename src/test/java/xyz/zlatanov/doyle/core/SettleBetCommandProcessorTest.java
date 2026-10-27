@@ -173,7 +173,7 @@ class SettleBetCommandProcessorTest {
         verifyNoInteractions(betSettlementRepository);
     }
 
-    // todo @Test
+    @Test
     void shouldNotPayOutOnUnchangedLoss() {
         when(betRepository.findById(outdatedLosingBet.id())).thenReturn(outdatedLosingBet);
 
