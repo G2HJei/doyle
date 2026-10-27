@@ -38,22 +38,22 @@ class SettleBetCommandProcessorTest {
     @InjectMocks
     SettleBetCommandProcessor commandProcessor;
 
-    EventOutcome outcome           = new EventOutcome()
+    EventOutcome outcome             = new EventOutcome()
             .eventId(UUID.randomUUID())
             .eventWinnerId(UUID.randomUUID())
             .version(1);
-    Bet          losingBet         = new Bet()
+    Bet          losingBet           = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(UUID.randomUUID()) //not the winner
             .status(PLACED);
-    Bet          winningBet        = new Bet()
+    Bet          winningBet          = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(outcome.eventWinnerId())
             .amount(ONE)
             .status(PLACED);
-    Bet          settledWinningBet = new Bet()
+    Bet          settledWinningBet   = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(outcome.eventWinnerId())
@@ -61,13 +61,21 @@ class SettleBetCommandProcessorTest {
             .status(SETTLED)
             .result(WON)
             .settledEventVersion(1);
-    Bet          correctionBet     = new Bet()
+    Bet          correctionBet       = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(UUID.randomUUID())
             .amount(ONE)
             .status(SETTLED)
             .result(WON)
+            .settledEventVersion(0);
+    Bet          correctionLosingBet = new Bet()
+            .id(UUID.randomUUID())
+            .eventId(outcome.eventId())
+            .eventWinnerId(outcome.eventWinnerId())
+            .amount(ONE)
+            .status(SETTLED)
+            .result(LOST)
             .settledEventVersion(0);
 
     @BeforeEach
@@ -120,6 +128,21 @@ class SettleBetCommandProcessorTest {
                 .betId(correctionBet.id())
                 .settledEventVersion(1)
                 .deltaAmount(new BigDecimal("-2"))
+                .payoutStatus(PENDING)
+        );
+    }
+
+    @Test
+    void shouldSettleOnWinnerChanged() {
+        when(betRepository.findById(correctionLosingBet.id())).thenReturn(correctionLosingBet);
+
+        commandProcessor.settle(new SettleBetCommand().betId(correctionLosingBet.id()));
+
+        verify(betRepository).updateStatusAndResult(correctionLosingBet.id(), SETTLED, WON);
+        verify(betSettlementRepository).save(new BetSettlement()
+                .betId(correctionLosingBet.id())
+                .settledEventVersion(1)
+                .deltaAmount(ONE)
                 .payoutStatus(PENDING)
         );
     }
