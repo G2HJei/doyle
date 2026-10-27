@@ -1,0 +1,119 @@
+package xyz.zlatanov.doyle.adapter.driven;
+
+import lombok.val;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import xyz.zlatanov.doyle.core.domain.EventOutcome;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.util.Comparator.comparing;
+import static org.junit.jupiter.api.Assertions.*;
+
+@JdbcTest
+@Import({ JdbcEventOutcomeRepository.class, UuidV7Service.class })
+class JdbcEventOutcomeRepositoryTest {
+
+    @Autowired
+    JdbcEventOutcomeRepository repository;
+
+    @Test
+    void shouldInsertNewOutcomeAsFirstVersion() {
+        val outcome = outcome();
+
+        repository.save(outcome);
+
+        assertNotNull(outcome.id());
+        assertEquals(1, outcome.version());
+        assertEquals(outcome, repository.findOneByEventId(outcome.eventId()));
+    }
+
+    @Test
+    void shouldSaveChangedOutcomeAsNextVersion() {
+        val outcome = outcome();
+        repository.save(outcome);
+
+        repository.save(outcome.eventWinnerId(UUID.randomUUID()));
+
+        assertEquals(2, outcome.version());
+        assertEquals(outcome, repository.findOneByEventId(outcome.eventId()));
+    }
+
+    @Test
+    void shouldRejectStaleUpdate() {
+        val outcome = outcome();
+        repository.save(outcome);
+        val concurrentlyReadOutcome = repository.findOneByEventId(outcome.eventId());
+        repository.save(outcome.eventWinnerId(UUID.randomUUID()));
+
+        assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadOutcome));
+    }
+
+    @Test
+    void shouldRejectSecondOutcomeForSameEvent() {
+        val outcome = outcome();
+        repository.save(outcome);
+
+        assertThrows(DuplicateKeyException.class, () -> repository.save(outcome().eventId(outcome.eventId())));
+    }
+
+    @Test
+    void shouldReturnNullForUnknownEvent() {
+        assertNull(repository.findOneByEventId(UUID.randomUUID()));
+    }
+
+    @Test
+    void shouldFindUnpublishedOrderedByIdUpToLimit() {
+        val outcomes = List.of(outcome(), outcome().published(true), outcome(), outcome());
+        outcomes.forEach(repository::save);
+        val unpublished = outcomes.stream()
+                .filter(o -> !o.published())
+                .sorted(comparing(EventOutcome::id))
+                .toList();
+
+        assertEquals(unpublished.subList(0, 2), repository.findUnpublished(2));
+    }
+
+    @Test
+    void shouldMarkPublishedWithoutChangingVersion() {
+        val outcome_1 = outcome();
+        val outcome_2 = outcome();
+        List.of(outcome_1, outcome_2).forEach(repository::save);
+
+        repository.markPublished(List.of(outcome_1));
+
+        assertEquals(List.of(outcome_2), repository.findUnpublished(10));
+        assertEquals(outcome_1.published(true), repository.findOneByEventId(outcome_1.eventId()));
+    }
+
+    @Test
+    void shouldNotMarkPublishedStaleOutcome() {
+        val outcome_1 = outcome();
+        val outcome_2 = outcome();
+        List.of(outcome_1, outcome_2).forEach(repository::save);
+        val staleOutcome_2 = repository.findOneByEventId(outcome_2.eventId());
+        repository.save(outcome_2.eventWinnerId(UUID.randomUUID()));
+
+        repository.markPublished(List.of(outcome_1, staleOutcome_2));
+
+        assertEquals(List.of(outcome_2), repository.findUnpublished(10));
+    }
+
+    @Test
+    void shouldIgnoreMarkPublishedOfNoOutcomes() {
+        assertDoesNotThrow(() -> repository.markPublished(List.of()));
+    }
+
+    EventOutcome outcome() {
+        return new EventOutcome()
+                .eventId(UUID.randomUUID())
+                .eventName("test event")
+                .eventWinnerId(UUID.randomUUID())
+                .published(false);
+    }
+}
