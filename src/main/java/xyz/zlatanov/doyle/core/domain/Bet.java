@@ -18,7 +18,7 @@ public class Bet {
     private BigDecimal amount;
     private BetStatus  status;
     private BetResult  result;
-    private int        settledEventVersion;
+    private Integer    settledEventVersion;
 
     public enum BetStatus {
         PLACED, SETTLED

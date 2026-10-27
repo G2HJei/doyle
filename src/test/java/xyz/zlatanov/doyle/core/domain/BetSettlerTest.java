@@ -17,64 +17,15 @@ import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PENDING;
 
 class BetSettlerTest {
 
-    EventOutcome outcome             = new EventOutcome()
+    EventOutcome outcome = new EventOutcome()
             .eventId(UUID.randomUUID())
             .eventWinnerId(UUID.randomUUID())
             .version(1);
-    Bet          losingBet           = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(UUID.randomUUID()) //not the winner
-            .status(PLACED);
-    Bet          winningBet          = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(outcome.eventWinnerId())
-            .amount(ONE)
-            .status(PLACED);
-    Bet          settledWinningBet   = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(outcome.eventWinnerId())
-            .amount(ONE)
-            .status(SETTLED)
-            .result(WON)
-            .settledEventVersion(1);
-    Bet          correctionBet       = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(UUID.randomUUID())
-            .amount(ONE)
-            .status(SETTLED)
-            .result(WON)
-            .settledEventVersion(0);
-    Bet          correctionLosingBet = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(outcome.eventWinnerId())
-            .amount(ONE)
-            .status(SETTLED)
-            .result(LOST)
-            .settledEventVersion(0);
-    Bet          outdatedWinningBet  = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(outcome.eventWinnerId())
-            .amount(ONE)
-            .status(SETTLED)
-            .result(WON)
-            .settledEventVersion(0);
-    Bet          outdatedLosingBet   = new Bet()
-            .id(UUID.randomUUID())
-            .eventId(outcome.eventId())
-            .eventWinnerId(UUID.randomUUID())
-            .amount(ONE)
-            .status(SETTLED)
-            .result(LOST)
-            .settledEventVersion(0);
 
     @Test
     void shouldSettleBetAsLost() {
+        val losingBet = bet(UUID.randomUUID(), PLACED, null, null); //not the winner
+
         val toSave = new BetSettler(losingBet, outcome).settle();
 
         assertEquals(expected(losingBet, LOST), toSave.bet());
@@ -83,6 +34,8 @@ class BetSettlerTest {
 
     @Test
     void shouldSettleWinningBet() {
+        val winningBet = bet(outcome.eventWinnerId(), PLACED, null, null);
+
         val toSave = new BetSettler(winningBet, outcome).settle();
 
         assertEquals(expected(winningBet, WON), toSave.bet());
@@ -95,6 +48,8 @@ class BetSettlerTest {
 
     @Test
     void shouldNoOpAlreadySettledBet() {
+        val settledWinningBet = bet(outcome.eventWinnerId(), SETTLED, WON, 1);
+
         val toSave = new BetSettler(settledWinningBet, outcome).settle();
 
         assertNull(toSave.bet());
@@ -103,6 +58,8 @@ class BetSettlerTest {
 
     @Test
     void shouldResettleOnWinnerChanged() {
+        val correctionBet = bet(UUID.randomUUID(), SETTLED, WON, 0);
+
         val toSave = new BetSettler(correctionBet, outcome).settle();
 
         assertEquals(expected(correctionBet, LOST), toSave.bet());
@@ -115,6 +72,8 @@ class BetSettlerTest {
 
     @Test
     void shouldSettleOnWinnerChanged() {
+        val correctionLosingBet = bet(outcome.eventWinnerId(), SETTLED, LOST, 0);
+
         val toSave = new BetSettler(correctionLosingBet, outcome).settle();
 
         assertEquals(expected(correctionLosingBet, WON), toSave.bet());
@@ -127,6 +86,8 @@ class BetSettlerTest {
 
     @Test
     void shouldNotPayOutAgainOnUnchangedWinner() {
+        val outdatedWinningBet = bet(outcome.eventWinnerId(), SETTLED, WON, 0);
+
         val toSave = new BetSettler(outdatedWinningBet, outcome).settle();
 
         assertEquals(expected(outdatedWinningBet, WON), toSave.bet());
@@ -135,10 +96,23 @@ class BetSettlerTest {
 
     @Test
     void shouldNotPayOutOnUnchangedLoss() {
+        val outdatedLosingBet = bet(UUID.randomUUID(), SETTLED, LOST, 0);
+
         val toSave = new BetSettler(outdatedLosingBet, outcome).settle();
 
         assertEquals(expected(outdatedLosingBet, LOST), toSave.bet());
         assertNull(toSave.betSettlement());
+    }
+
+    Bet bet(UUID eventWinnerId, Bet.BetStatus status, Bet.BetResult result, Integer settledEventVersion) {
+        return new Bet()
+                .id(UUID.randomUUID())
+                .eventId(outcome.eventId())
+                .eventWinnerId(eventWinnerId)
+                .amount(ONE)
+                .status(status)
+                .result(result)
+                .settledEventVersion(settledEventVersion);
     }
 
     Bet expected(Bet bet, Bet.BetResult result) {

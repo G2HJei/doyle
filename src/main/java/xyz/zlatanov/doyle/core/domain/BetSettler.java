@@ -35,7 +35,7 @@ public class BetSettler {
     }
 
     private boolean outcomeAlreadySettled() {
-        return bet.settledEventVersion() >= eventOutcome.version();
+        return bet.settledEventVersion() != null && bet.settledEventVersion() >= eventOutcome.version();
     }
 
     private Bet settledBet() {
