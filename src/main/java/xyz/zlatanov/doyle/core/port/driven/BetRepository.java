@@ -11,5 +11,6 @@ public interface BetRepository {
 
     Bet findById(UUID id);
 
+    //todo replace with generic save with version?
     void updateSettlementData(UUID id, Bet.BetStatus status, Bet.BetResult result, int settledEventVersion);
 }

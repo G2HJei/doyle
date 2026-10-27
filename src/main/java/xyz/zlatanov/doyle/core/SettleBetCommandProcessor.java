@@ -38,6 +38,9 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
         if (!won && PLACED == bet.status()) {
             return; // nothing to pay out
         }
+        if (won && WON == bet.result()) {
+            return; // already paid out
+        }
         betSettlementRepository.save(new BetSettlement()
                 .betId(bet.id())
                 .settledEventVersion(eventOutcome.version())

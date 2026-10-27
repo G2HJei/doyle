@@ -163,7 +163,7 @@ class SettleBetCommandProcessorTest {
         );
     }
 
-    // todo s@Test
+    @Test
     void shouldNotPayOutAgainOnUnchangedWinner() {
         when(betRepository.findById(outdatedWinningBet.id())).thenReturn(outdatedWinningBet);
 
