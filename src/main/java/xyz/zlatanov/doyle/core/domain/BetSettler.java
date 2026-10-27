@@ -66,7 +66,7 @@ public class BetSettler {
 
     // odds not included in the model, so assumption is the odds are always 2 and the bet amount is equal to the payout
     private BigDecimal deltaAmount() {
-        return revokedWin() ? bet.amount().multiply(new BigDecimal("-2")) : bet.amount();
+        return revokedWin() ? bet.amount().negate() : bet.amount();
     }
 
     private boolean revokedWin() {
