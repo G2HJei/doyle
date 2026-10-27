@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import xyz.zlatanov.doyle.core.domain.Bet;
 import xyz.zlatanov.doyle.core.domain.BetSettlement;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
@@ -29,36 +28,26 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
 
     @Override
     public void settle(SettleBetCommand command) {
-        val betId = command.betId();
-        val bet = betRepository.findById(betId);
+        val bet = betRepository.findById(command.betId());
         val eventOutcome = eventOutcomeLookup.getEventOutcome(bet.eventId());
         if (bet.settledEventVersion() >= eventOutcome.version()) {
-            return; // no op
+            return; // already settled against this outcome version
         }
         val won = Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId());
+        betRepository.updateStatusAndResult(bet.id(), SETTLED, won ? WON : LOST);
         if (!won && PLACED == bet.status()) {
-            betRepository.updateStatusAndResult(betId, SETTLED, LOST);
-        } else {
-            val settlement = getBetSettlement(bet, eventOutcome);
-            betRepository.updateStatusAndResult(betId, SETTLED, won ? WON : LOST);
-            betSettlementRepository.save(settlement);
+            return; // nothing to pay out
         }
-    }
-
-    //odds not included in the model, so assumption is the odds are always 1
-    private BetSettlement getBetSettlement(Bet bet, EventOutcome eventOutcome) {
-        val won = Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId());
-        if (!won && WON == bet.result()) {
-            return new BetSettlement()
-                    .betId(bet.id())
-                    .settledEventVersion(eventOutcome.version())
-                    .deltaAmount(bet.amount().multiply(new BigDecimal("-2")))
-                    .payoutStatus(PENDING);
-        }
-        return new BetSettlement()
+        betSettlementRepository.save(new BetSettlement()
                 .betId(bet.id())
                 .settledEventVersion(eventOutcome.version())
-                .deltaAmount(bet.amount()) //odds not included in the model, so assumption is the bet amount is the whole stake
-                .payoutStatus(PENDING);
+                .deltaAmount(deltaAmount(bet, won))
+                .payoutStatus(PENDING));
+    }
+
+    // odds not included in the model, so assumption is the odds are always 1 and the bet amount is the whole stake
+    private BigDecimal deltaAmount(Bet bet, boolean won) {
+        val revokedWin = !won && WON == bet.result();
+        return revokedWin ? bet.amount().multiply(new BigDecimal("-2")) : bet.amount();
     }
 }
