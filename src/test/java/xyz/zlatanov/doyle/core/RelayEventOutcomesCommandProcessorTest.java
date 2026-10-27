@@ -66,6 +66,6 @@ class RelayEventOutcomesCommandProcessorTest {
     void verifyOutboxPublished(EventOutcome outcome) {
         val inOrder = inOrder(publisher, outcomeRepository);
         inOrder.verify(publisher).publish(expectedMessage(outcome));
-        inOrder.verify(outcomeRepository).markPublished(List.of(outcome.id()));
+        inOrder.verify(outcomeRepository).markPublished(List.of(outcome));
     }
 }

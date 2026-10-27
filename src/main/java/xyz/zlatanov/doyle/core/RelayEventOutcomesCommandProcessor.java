@@ -18,12 +18,9 @@ public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUse
 
     @Override
     public void relayOutcomes() {
-        val outcomeIds = outcomeRepository.findUnpublished(CHUNK_SIZE)
-                .stream()
-                .peek(this::publish)
-                .map(EventOutcome::id)
-                .toList();
-        outcomeRepository.markPublished(outcomeIds);
+        val outcomes = outcomeRepository.findUnpublished(CHUNK_SIZE);
+        outcomes.forEach(this::publish);
+        outcomeRepository.markPublished(outcomes);
     }
 
     private void publish(EventOutcome outcome) {
