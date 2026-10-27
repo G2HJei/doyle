@@ -77,6 +77,22 @@ class SettleBetCommandProcessorTest {
             .status(SETTLED)
             .result(LOST)
             .settledEventVersion(0);
+    Bet          outdatedWinningBet  = new Bet()
+            .id(UUID.randomUUID())
+            .eventId(outcome.eventId())
+            .eventWinnerId(outcome.eventWinnerId())
+            .amount(ONE)
+            .status(SETTLED)
+            .result(WON)
+            .settledEventVersion(0);
+    Bet          outdatedLosingBet   = new Bet()
+            .id(UUID.randomUUID())
+            .eventId(outcome.eventId())
+            .eventWinnerId(UUID.randomUUID())
+            .amount(ONE)
+            .status(SETTLED)
+            .result(LOST)
+            .settledEventVersion(0);
 
     @BeforeEach
     void setUp() {
@@ -89,7 +105,7 @@ class SettleBetCommandProcessorTest {
 
         commandProcessor.settle(new SettleBetCommand().betId(losingBet.id()));
 
-        verify(betRepository).updateStatusAndResult(losingBet.id(), SETTLED, LOST);
+        verify(betRepository).updateSettlementData(losingBet.id(), SETTLED, LOST, 1);
         verifyNoInteractions(betSettlementRepository);
     }
 
@@ -99,7 +115,7 @@ class SettleBetCommandProcessorTest {
 
         commandProcessor.settle(new SettleBetCommand().betId(winningBet.id()));
 
-        verify(betRepository).updateStatusAndResult(winningBet.id(), SETTLED, WON);
+        verify(betRepository).updateSettlementData(winningBet.id(), SETTLED, WON, 1);
         verify(betSettlementRepository).save(new BetSettlement()
                 .betId(winningBet.id())
                 .settledEventVersion(1)
@@ -113,7 +129,7 @@ class SettleBetCommandProcessorTest {
 
         commandProcessor.settle(new SettleBetCommand().betId(settledWinningBet.id()));
 
-        verify(betRepository, never()).updateStatusAndResult(any(), any(), any());
+        verify(betRepository, never()).updateSettlementData(any(), any(), any(), anyInt());
         verifyNoInteractions(betSettlementRepository);
     }
 
@@ -123,7 +139,7 @@ class SettleBetCommandProcessorTest {
 
         commandProcessor.settle(new SettleBetCommand().betId(correctionBet.id()));
 
-        verify(betRepository).updateStatusAndResult(correctionBet.id(), SETTLED, LOST);
+        verify(betRepository).updateSettlementData(correctionBet.id(), SETTLED, LOST, 1);
         verify(betSettlementRepository).save(new BetSettlement()
                 .betId(correctionBet.id())
                 .settledEventVersion(1)
@@ -138,12 +154,32 @@ class SettleBetCommandProcessorTest {
 
         commandProcessor.settle(new SettleBetCommand().betId(correctionLosingBet.id()));
 
-        verify(betRepository).updateStatusAndResult(correctionLosingBet.id(), SETTLED, WON);
+        verify(betRepository).updateSettlementData(correctionLosingBet.id(), SETTLED, WON, 1);
         verify(betSettlementRepository).save(new BetSettlement()
                 .betId(correctionLosingBet.id())
                 .settledEventVersion(1)
                 .deltaAmount(ONE)
                 .payoutStatus(PENDING)
         );
+    }
+
+    // todo s@Test
+    void shouldNotPayOutAgainOnUnchangedWinner() {
+        when(betRepository.findById(outdatedWinningBet.id())).thenReturn(outdatedWinningBet);
+
+        commandProcessor.settle(new SettleBetCommand().betId(outdatedWinningBet.id()));
+
+        verify(betRepository).updateSettlementData(outdatedWinningBet.id(), SETTLED, WON, 1);
+        verifyNoInteractions(betSettlementRepository);
+    }
+
+    // todo @Test
+    void shouldNotPayOutOnUnchangedLoss() {
+        when(betRepository.findById(outdatedLosingBet.id())).thenReturn(outdatedLosingBet);
+
+        commandProcessor.settle(new SettleBetCommand().betId(outdatedLosingBet.id()));
+
+        verify(betRepository).updateSettlementData(outdatedLosingBet.id(), SETTLED, LOST, 1);
+        verifyNoInteractions(betSettlementRepository);
     }
 }
