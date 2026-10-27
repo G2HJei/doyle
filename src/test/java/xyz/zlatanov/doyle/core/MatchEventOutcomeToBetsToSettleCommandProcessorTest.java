@@ -76,6 +76,16 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
         verifySettlementsPublished(bet, otherBet);
     }
 
+    @Test
+    void shouldTrackLastBetId() {
+        betsToSettle(bet);
+        commandProcessor.match();
+        verify(settlementJobRepository).save(
+                new SettlementJob()
+                        .eventId(settlementJob.eventId())
+                        .lastBetId(bet.id()));
+    }
+
     Bet getBet() {
         return new Bet()
                 .id(UUID.randomUUID())

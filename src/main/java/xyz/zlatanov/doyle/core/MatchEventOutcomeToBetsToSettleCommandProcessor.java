@@ -32,6 +32,7 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
             settlementJobRepository.save(job.completed(true));
         } else {
             settle(bets);
+            settlementJobRepository.save(job.lastBetId(bets.get(bets.size() - 1).id()));
         }
     }
 
