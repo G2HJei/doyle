@@ -34,18 +34,17 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
         if (outcomeAlreadySettled(bet, eventOutcome)) {
             return;
         }
-        val firstSettle = PLACED == bet.status();
-        val won = Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId());
+        val newResult = Objects.equals(bet.eventWinnerId(), eventOutcome.eventWinnerId()) ? WON : LOST;
         val oldResult = bet.result();
-        val newResult = won ? WON : LOST;
-        val resultChanged = newResult != bet.result();
+        val firstSettle = PLACED == bet.status();
         betRepository.save(bet
                 .status(SETTLED)
                 .result(newResult)
                 .settledEventVersion(eventOutcome.version()));
-        if (firstSettle && !won) {
+        if (firstSettle && LOST == newResult) {
             return; // nothing to pay out
         }
+        val resultChanged = newResult != oldResult;
         if (resultChanged) {
             betSettlementRepository.save(new BetSettlement()
                     .betId(bet.id())
