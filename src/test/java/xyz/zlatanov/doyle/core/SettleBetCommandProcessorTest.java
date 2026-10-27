@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.zlatanov.doyle.core.domain.Bet;
+import xyz.zlatanov.doyle.core.domain.BetSettlement;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
@@ -15,10 +16,13 @@ import xyz.zlatanov.doyle.core.port.driven.EventOutcomeLookup;
 
 import java.util.UUID;
 
+import static java.math.BigDecimal.ONE;
 import static org.mockito.Mockito.*;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.LOST;
+import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.WON;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
 import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
+import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PENDING;
 
 @ExtendWith(MockitoExtension.class)
 class SettleBetCommandProcessorTest {
@@ -33,19 +37,20 @@ class SettleBetCommandProcessorTest {
     @InjectMocks
     SettleBetCommandProcessor commandProcessor;
 
-    EventOutcome outcome   = new EventOutcome()
+    EventOutcome outcome    = new EventOutcome()
             .eventId(UUID.randomUUID())
             .eventWinnerId(UUID.randomUUID())
             .version(1);
-    Bet          losingBet = new Bet()
+    Bet          losingBet  = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(UUID.randomUUID()) //not the winner
             .status(PLACED);
-    Bet          winning   = new Bet()
+    Bet          winningBet = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(outcome.eventWinnerId())
+            .amount(ONE)
             .status(PLACED);
 
     @BeforeEach
@@ -65,11 +70,15 @@ class SettleBetCommandProcessorTest {
 
     @Test
     void shouldSettleWinningBet() {
-        when(betRepository.findById(winning.id())).thenReturn(winning);
+        when(betRepository.findById(winningBet.id())).thenReturn(winningBet);
 
-        commandProcessor.settle(new SettleBetCommand().betId(winning.id()));
+        commandProcessor.settle(new SettleBetCommand().betId(winningBet.id()));
 
-        //todo verify status and result
-        //todo verify settlement saved
+        verify(betRepository).updateStatusAndResult(winningBet.id(), SETTLED, WON);
+        verify(betSettlementRepository).save(new BetSettlement()
+                .betId(winningBet.id())
+                .settledEventVersion(1)
+                .deltaAmount(ONE)
+                .payoutStatus(PENDING));
     }
 }
