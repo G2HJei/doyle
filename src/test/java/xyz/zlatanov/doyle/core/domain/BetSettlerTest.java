@@ -77,7 +77,7 @@ class BetSettlerTest {
     void shouldSettleBetAsLost() {
         val toSave = new BetSettler(losingBet, outcome).settle();
 
-        assertEquals(expected(losingBet, LOST, 1), toSave.bet());
+        assertEquals(expected(losingBet, LOST), toSave.bet());
         assertNull(toSave.betSettlement());
     }
 
@@ -85,7 +85,7 @@ class BetSettlerTest {
     void shouldSettleWinningBet() {
         val toSave = new BetSettler(winningBet, outcome).settle();
 
-        assertEquals(expected(winningBet, WON, 1), toSave.bet());
+        assertEquals(expected(winningBet, WON), toSave.bet());
         assertEquals(new BetSettlement()
                 .betId(winningBet.id())
                 .settledEventVersion(1)
@@ -105,7 +105,7 @@ class BetSettlerTest {
     void shouldResettleOnWinnerChanged() {
         val toSave = new BetSettler(correctionBet, outcome).settle();
 
-        assertEquals(expected(correctionBet, LOST, 1), toSave.bet());
+        assertEquals(expected(correctionBet, LOST), toSave.bet());
         assertEquals(new BetSettlement()
                 .betId(correctionBet.id())
                 .settledEventVersion(1)
@@ -117,7 +117,7 @@ class BetSettlerTest {
     void shouldSettleOnWinnerChanged() {
         val toSave = new BetSettler(correctionLosingBet, outcome).settle();
 
-        assertEquals(expected(correctionLosingBet, WON, 1), toSave.bet());
+        assertEquals(expected(correctionLosingBet, WON), toSave.bet());
         assertEquals(new BetSettlement()
                 .betId(correctionLosingBet.id())
                 .settledEventVersion(1)
@@ -129,7 +129,7 @@ class BetSettlerTest {
     void shouldNotPayOutAgainOnUnchangedWinner() {
         val toSave = new BetSettler(outdatedWinningBet, outcome).settle();
 
-        assertEquals(expected(outdatedWinningBet, WON, 1), toSave.bet());
+        assertEquals(expected(outdatedWinningBet, WON), toSave.bet());
         assertNull(toSave.betSettlement());
     }
 
@@ -137,11 +137,11 @@ class BetSettlerTest {
     void shouldNotPayOutOnUnchangedLoss() {
         val toSave = new BetSettler(outdatedLosingBet, outcome).settle();
 
-        assertEquals(expected(outdatedLosingBet, LOST, 1), toSave.bet());
+        assertEquals(expected(outdatedLosingBet, LOST), toSave.bet());
         assertNull(toSave.betSettlement());
     }
 
-    Bet expected(Bet bet, Bet.BetResult result, int settledEventVersion) {
+    Bet expected(Bet bet, Bet.BetResult result) {
         return new Bet()
                 .id(bet.id())
                 .userId(bet.userId())
@@ -151,6 +151,6 @@ class BetSettlerTest {
                 .amount(bet.amount())
                 .status(SETTLED)
                 .result(result)
-                .settledEventVersion(settledEventVersion);
+                .settledEventVersion(1);
     }
 }
