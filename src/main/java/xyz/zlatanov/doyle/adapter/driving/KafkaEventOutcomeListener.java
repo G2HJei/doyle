@@ -16,8 +16,7 @@ public class KafkaEventOutcomeListener {
 
     @KafkaListener(topics = EVENT_OUTCOMES_TOPIC)
     public void consume(EventOutcomeMessage outcome) {
-        consumeEventOutcomeUseCase.consumeOutcome(new ConsumeEventOutcomeCommand()
-                .eventId(new EventId(outcome.eventId()))
-                .outcomeVersion(outcome.version()));
+        consumeEventOutcomeUseCase.consumeOutcome(
+                new ConsumeEventOutcomeCommand(new EventId(outcome.eventId()), outcome.version()));
     }
 }

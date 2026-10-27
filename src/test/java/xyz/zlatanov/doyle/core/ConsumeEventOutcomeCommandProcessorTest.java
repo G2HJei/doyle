@@ -14,16 +14,14 @@ import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ConsumeEventOutcomeServiceTest {
+class ConsumeEventOutcomeCommandProcessorTest {
 
     @Mock
     SettlementJobRepository    settlementJobRepository;
     @InjectMocks
-    ConsumeEventOutcomeService service;
+    ConsumeEventOutcomeCommandProcessor service;
 
-    ConsumeEventOutcomeCommand command = new ConsumeEventOutcomeCommand()
-            .eventId(new EventId(randomUUID()))
-            .outcomeVersion(-1);
+    ConsumeEventOutcomeCommand command = new ConsumeEventOutcomeCommand(new EventId(randomUUID()), -1);
 
     @Test
     void shouldCreateSettlementJob() {

@@ -16,9 +16,7 @@ public record SeedBetsRequest(@NotNull @Valid BetTemplate template,
                               @NotNull @Positive Integer createCount) {
 
     SeedBetsCommand toCommand() {
-        return new SeedBetsCommand()
-                .template(template.toTemplate())
-                .createCount(createCount);
+        return new SeedBetsCommand(template.toTemplate(), createCount);
     }
 
     public record BetTemplate(@NotNull UUID userId,
@@ -28,12 +26,12 @@ public record SeedBetsRequest(@NotNull @Valid BetTemplate template,
                               @NotNull @Positive BigDecimal amount) {
 
         SeedBetsCommand.BetTemplate toTemplate() {
-            return new SeedBetsCommand.BetTemplate()
-                    .userId(new UserId(userId))
-                    .eventId(new EventId(eventId))
-                    .eventMarketId(new EventMarketId(eventMarketId))
-                    .eventWinnerId(new CompetitorId(eventWinnerId))
-                    .amount(amount);
+            return new SeedBetsCommand.BetTemplate(
+                    new UserId(userId),
+                    new EventId(eventId),
+                    new EventMarketId(eventMarketId),
+                    new CompetitorId(eventWinnerId),
+                    amount);
         }
     }
 }

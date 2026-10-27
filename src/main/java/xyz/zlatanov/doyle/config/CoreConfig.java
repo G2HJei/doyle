@@ -24,7 +24,7 @@ public class CoreConfig {
 
     @Bean
     ConsumeEventOutcomeUseCase consumeEventOutcomeUseCase(SettlementJobRepository settlementJobRepository) {
-        return new ConsumeEventOutcomeService(settlementJobRepository);
+        return new ConsumeEventOutcomeCommandProcessor(settlementJobRepository);
     }
 
     @Bean
@@ -50,7 +50,7 @@ public class CoreConfig {
     }
 
     @Bean
-    GetEventDataUseCase getEventDataService(EventDataRepository eventDataRepository) {
-        return new GetEventDataService(eventDataRepository);
+    GetEventDataUseCase getEventDataUseCase(EventDataRepository eventDataRepository) {
+        return new GetEventDataCommandProcessor(eventDataRepository);
     }
 }

@@ -40,6 +40,6 @@ public class RocketMqBetSettlementListener implements MessageListenerOrderly {
 
     private void settle(MessageExt message) {
         val settlement = jsonMapper.readValue(message.getBody(), BetSettlementMessage.class);
-        settleBetUseCase.settle(new SettleBetCommand().betId(new BetId(settlement.betId())));
+        settleBetUseCase.settle(new SettleBetCommand(new BetId(settlement.betId())));
     }
 }

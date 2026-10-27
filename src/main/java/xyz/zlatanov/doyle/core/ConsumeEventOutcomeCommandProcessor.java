@@ -11,7 +11,7 @@ import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ConsumeEventOutcomeService implements ConsumeEventOutcomeUseCase {
+public class ConsumeEventOutcomeCommandProcessor implements ConsumeEventOutcomeUseCase {
 
     private final SettlementJobRepository settlementJobRepository;
 

@@ -14,9 +14,6 @@ public record PublishEventOutcomeRequest(@NotNull UUID eventId,
                                          @NotNull UUID eventWinnerId) {
 
     PublishEventOutcomeCommand toCommand() {
-        return new PublishEventOutcomeCommand()
-                .eventId(new EventId(eventId))
-                .eventName(eventName)
-                .eventWinnerId(new CompetitorId(eventWinnerId));
+        return new PublishEventOutcomeCommand(new EventId(eventId), eventName, new CompetitorId(eventWinnerId));
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class GetEventDataService implements GetEventDataUseCase {
+public class GetEventDataCommandProcessor implements GetEventDataUseCase {
 
     private final EventDataRepository eventDataRepository;
 

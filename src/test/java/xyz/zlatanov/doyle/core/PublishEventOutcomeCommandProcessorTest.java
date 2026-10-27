@@ -25,10 +25,8 @@ class PublishEventOutcomeCommandProcessorTest {
     @InjectMocks
     PublishEventOutcomeCommandProcessor service;
 
-    PublishEventOutcomeCommand command = new PublishEventOutcomeCommand()
-            .eventId(new EventId(randomUUID()))
-            .eventName("Victoria-Levski")
-            .eventWinnerId(new CompetitorId(randomUUID()));
+    PublishEventOutcomeCommand command = new PublishEventOutcomeCommand(
+            new EventId(randomUUID()), "Victoria-Levski", new CompetitorId(randomUUID()));
 
     @Test
     void shouldPublishNewEventOutcome() {
