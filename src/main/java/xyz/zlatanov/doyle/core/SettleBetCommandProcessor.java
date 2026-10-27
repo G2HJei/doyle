@@ -10,14 +10,14 @@ import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
-import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
+import xyz.zlatanov.doyle.core.port.driven.EventOutcomeLookup;
 import xyz.zlatanov.doyle.core.port.driving.SettleBetUseCase;
 
 @Slf4j
 @RequiredArgsConstructor
 public class SettleBetCommandProcessor implements SettleBetUseCase {
 
-    private final EventOutcomeRepository  eventOutcomeRepository;
+    private final EventOutcomeLookup      eventOutcomeLookup;
     private final BetRepository           betRepository;
     private final BetSettlementRepository betSettlementRepository;
 
@@ -26,7 +26,7 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
     //todo SettleBetCommand(s) can be batched to reduce DB queries with one-by-one fallback in case of an error
     public void settle(SettleBetCommand command) {
         val bet = betRepository.findById(command.betId());
-        val eventOutcome = eventOutcomeRepository.findOneByEventId(bet.eventId()); // todo can be cached
+        val eventOutcome = eventOutcomeLookup.findOneByEventId(bet.eventId());
         val toSave = new BetSettler(bet, eventOutcome).settle();
         if (toSave.bet() != null) {
             betRepository.save(toSave.bet());

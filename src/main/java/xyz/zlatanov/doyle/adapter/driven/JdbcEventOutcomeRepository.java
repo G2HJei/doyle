@@ -2,6 +2,7 @@ package xyz.zlatanov.doyle.adapter.driven;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -16,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+
+import static xyz.zlatanov.doyle.adapter.driven.CachingEventOutcomeLookup.EVENT_OUTCOMES_CACHE;
 
 @RequiredArgsConstructor
 public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
@@ -46,13 +49,15 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
                 .list();
     }
 
+    @CachePut(cacheNames = EVENT_OUTCOMES_CACHE, key = "#eventOutcome.eventId()")
     @Override
-    public void save(EventOutcome eventOutcome) {
+    public EventOutcome save(EventOutcome eventOutcome) {
         if (eventOutcome.id() == null) {
             insert(eventOutcome);
         } else {
             update(eventOutcome);
         }
+        return eventOutcome;
     }
 
     // optimistic locking skips outcomes changed since they were read, leaving their new version unpublished

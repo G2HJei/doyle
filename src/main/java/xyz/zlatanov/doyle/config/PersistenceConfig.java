@@ -30,6 +30,11 @@ public class PersistenceConfig {
     }
 
     @Bean
+    EventOutcomeLookup eventOutcomeLookup(EventOutcomeRepository eventOutcomeRepository) {
+        return new CachingEventOutcomeLookup(eventOutcomeRepository);
+    }
+
+    @Bean
     SettlementJobRepository settlementJobRepository(JdbcClient jdbcClient, UUIDService uuidService) {
         return new JdbcSettlementJobRepository(jdbcClient, uuidService);
     }

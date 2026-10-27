@@ -35,10 +35,10 @@ public class CoreConfig {
     }
 
     @Bean
-    SettleBetUseCase settleBetUseCase(EventOutcomeRepository eventOutcomeRepository,
+    SettleBetUseCase settleBetUseCase(EventOutcomeLookup eventOutcomeLookup,
                                       BetRepository betRepository,
                                       BetSettlementRepository betSettlementRepository) {
-        return new SettleBetCommandProcessor(eventOutcomeRepository, betRepository, betSettlementRepository);
+        return new SettleBetCommandProcessor(eventOutcomeLookup, betRepository, betSettlementRepository);
     }
 
     @Bean
