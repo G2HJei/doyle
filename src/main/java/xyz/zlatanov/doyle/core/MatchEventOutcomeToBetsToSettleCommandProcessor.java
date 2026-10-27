@@ -26,8 +26,10 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
 
     @Transactional
     @Override
-    public void match() {
-        settlementJobRepository.nextPending().ifPresent(this::match);
+    public boolean match() {
+        val job = settlementJobRepository.nextPending();
+        job.ifPresent(this::match);
+        return job.isPresent();
     }
 
     private void match(SettlementJob job) {

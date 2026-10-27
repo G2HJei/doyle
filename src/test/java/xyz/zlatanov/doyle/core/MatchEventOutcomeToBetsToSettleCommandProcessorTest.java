@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static xyz.zlatanov.doyle.core.MatchEventOutcomeToBetsToSettleCommandProcessor.CHUNK_SIZE;
@@ -81,6 +83,23 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
         commandProcessor.match();
 
         verifySettlementsPublished(bet, otherBet);
+    }
+
+    @Test
+    void shouldReportNothingMatchedWhenNoPendingJobs() {
+        when(settlementJobRepository.nextPending()).thenReturn(Optional.empty());
+        assertFalse(commandProcessor.match());
+    }
+
+    @Test
+    void shouldReportMatchedWhenBetSettlementsSent() {
+        betsToSettle(bet);
+        assertTrue(commandProcessor.match());
+    }
+
+    @Test
+    void shouldReportMatchedWhenJobCompleted() {
+        assertTrue(commandProcessor.match()); // another job may be pending
     }
 
     @Test
