@@ -93,6 +93,8 @@ class SettleBetCommandProcessorTest {
     void shouldNoOpAlreadySettledBet() {
         when(betRepository.findById(settledWinningBet.id())).thenReturn(settledWinningBet);
         commandProcessor.settle(new SettleBetCommand().betId(settledWinningBet.id()));
-        verifyNoInteractions(betRepository, betSettlementRepository);
+
+        verify(betRepository, never()).updateStatusAndResult(any(), any(), any());
+        verifyNoInteractions(betSettlementRepository);
     }
 }
