@@ -1,6 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
@@ -10,6 +11,7 @@ import xyz.zlatanov.doyle.core.port.driving.PublishEventOutcomeUseCase;
 
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeUseCase {
 
@@ -25,5 +27,7 @@ public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeU
                 .eventName(command.eventName())
                 .eventWinnerId(command.eventWinnerId())
                 .published(false));
+        log.info("Event outcome saved: eventId={}, outcomeVersion={}, winnerId={}",
+                eventOutcome.eventId(), eventOutcome.version(), eventOutcome.eventWinnerId());
     }
 }

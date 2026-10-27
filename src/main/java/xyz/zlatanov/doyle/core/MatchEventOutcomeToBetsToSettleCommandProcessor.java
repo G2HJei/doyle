@@ -1,6 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.Bet;
@@ -13,6 +14,7 @@ import xyz.zlatanov.doyle.core.port.driving.MatchEventOutcomeToBetsToSettleUseCa
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEventOutcomeToBetsToSettleUseCase {
 
@@ -32,9 +34,12 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
         val bets = getBetsToSettle(job);
         if (bets.isEmpty()) {
             settlementJobRepository.save(job.completed(true));
+            log.info("Settlement job completed: jobId={}, eventId={}, outcomeVersion={}", job.id(), job.eventId(), job.outcomeVersion());
         } else {
             settle(bets);
             settlementJobRepository.save(job.lastBetId(bets.get(bets.size() - 1).id()));
+            log.info("Bet settlements sent: jobId={}, eventId={}, outcomeVersion={}, count={}, lastBetId={}",
+                    job.id(), job.eventId(), job.outcomeVersion(), bets.size(), job.lastBetId());
         }
     }
 

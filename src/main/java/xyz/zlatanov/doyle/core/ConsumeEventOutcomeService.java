@@ -1,6 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
@@ -8,6 +9,7 @@ import xyz.zlatanov.doyle.core.domain.SettlementJob;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ConsumeEventOutcomeService implements ConsumeEventOutcomeUseCase {
 
@@ -18,6 +20,7 @@ public class ConsumeEventOutcomeService implements ConsumeEventOutcomeUseCase {
     public void consumeOutcome(EventOutcomeMessage outcomeMsg) {
         val settlementJob = toSettlementJob(outcomeMsg);
         settlementJobRepository.save(settlementJob);
+        log.info("Event outcome consumed: eventId={}, outcomeVersion={}", outcomeMsg.eventId(), outcomeMsg.version());
     }
 
     private SettlementJob toSettlementJob(EventOutcomeMessage outcomeMsg) {

@@ -1,6 +1,7 @@
 package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
@@ -9,6 +10,7 @@ import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import xyz.zlatanov.doyle.core.port.driving.RelayEventOutcomesUseCase;
 
+@Slf4j
 @RequiredArgsConstructor
 public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUseCase {
 
@@ -31,5 +33,6 @@ public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUse
                 .eventName(outcome.eventName())
                 .eventWinnerId(outcome.eventWinnerId())
                 .version(outcome.version()));
+        log.info("Event outcome relayed: eventId={}, outcomeVersion={}", outcome.eventId(), outcome.version());
     }
 }

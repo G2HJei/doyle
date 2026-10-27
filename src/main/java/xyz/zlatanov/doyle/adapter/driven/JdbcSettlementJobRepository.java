@@ -1,6 +1,7 @@
 package xyz.zlatanov.doyle.adapter.driven;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JdbcSettlementJobRepository implements SettlementJobRepository {
 
@@ -54,6 +56,7 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
             job.id(id).version(1);
         } catch (DuplicateKeyException e) {
             // unique (event_id, outcome_version): a repeated outcome message doesn't create another job
+            log.info("Settlement job already exists: eventId={}, outcomeVersion={}", job.eventId(), job.outcomeVersion());
         }
     }
 
