@@ -2,6 +2,7 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.Bet;
 import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
 import xyz.zlatanov.doyle.core.domain.SettlementJob;
@@ -21,6 +22,7 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
     private final BetRepository           betRepository;
     private final BetSettlementPublisher  betSettlementPublisher;
 
+    @Transactional
     @Override
     public void match() {
         val job = settlementJobRepository.nextPending();

@@ -2,6 +2,7 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.EventOutcome;
 import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
@@ -16,7 +17,7 @@ public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUse
     private final EventOutcomeRepository outcomeRepository;
     private final EventOutcomePublisher  publisher;
 
-    //todo add @Transactional everywhere needed
+    @Transactional
     @Override
     public void relayOutcomes() {
         val outcomes = outcomeRepository.findUnpublished(CHUNK_SIZE);

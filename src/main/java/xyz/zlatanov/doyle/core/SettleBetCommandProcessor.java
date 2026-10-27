@@ -2,6 +2,7 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
@@ -15,11 +16,13 @@ public class SettleBetCommandProcessor implements SettleBetUseCase {
     private final BetRepository           betRepository;
     private final BetSettlementRepository betSettlementRepository;
 
+    @Transactional
     @Override
     public void settle(SettleBetCommand command) {
         val bet = betRepository.findById(command.betId());
         val eventOutcome = eventOutcomeLookup.getEventOutcome(bet.eventId());
         val toSave = new BetSettler(bet, eventOutcome).settle();
+        //todo extract transactional outbox to reduce transaction time
         if (toSave.bet() != null) {
             betRepository.save(toSave.bet());
         }
