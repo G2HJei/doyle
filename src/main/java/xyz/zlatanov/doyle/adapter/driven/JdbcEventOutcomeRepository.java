@@ -30,13 +30,14 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     }
 
     @Override
-    public List<EventOutcome> findUnpublished(int limit) { //todo select for update?
+    public List<EventOutcome> findUnpublished(int limit) {
         return jdbcClient.sql("""
                         SELECT * FROM event_outcome
                         WHERE published = FALSE
                         ORDER BY id
                         LIMIT :limit
                         """)
+                //todo add pessimistic lock like "FOR UPDATE SKIP LOCKED" in real (non-H2) scenario for scaling
                 .param("limit", limit)
                 .query(this::toEventOutcome)
                 .list();
@@ -58,7 +59,7 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
             return; // IN () is not valid SQL
         }
         val idVersions = outcomes.stream()
-                .map(o -> new Object[] { o.id(), o.version() })
+                .map(o -> new Object[]{o.id(), o.version()})
                 .toList();
         jdbcClient.sql("UPDATE event_outcome SET published = TRUE WHERE (id, version) IN (:idVersions)")
                 .param("idVersions", idVersions)

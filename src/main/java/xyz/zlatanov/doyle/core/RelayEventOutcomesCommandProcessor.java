@@ -16,6 +16,7 @@ public class RelayEventOutcomesCommandProcessor implements RelayEventOutcomesUse
     private final EventOutcomeRepository outcomeRepository;
     private final EventOutcomePublisher  publisher;
 
+    //todo add @Transactional everywhere needed
     @Override
     public void relayOutcomes() {
         val outcomes = outcomeRepository.findUnpublished(CHUNK_SIZE);

@@ -30,7 +30,7 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
     }
 
     @Override
-    public SettlementJob nextPending() { // todo select for update skip locked pessimistic lock?
+    public SettlementJob nextPending() { // todo select for update skip locked pessimistic lock? (pointless with H2)
         return jdbcClient.sql("""
                         SELECT * FROM settlement_job
                         WHERE completed = FALSE
