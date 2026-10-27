@@ -5,8 +5,8 @@ import lombok.val;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.BetSettlement;
-import xyz.zlatanov.doyle.core.domain.BetSettlementId;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.id.BetSettlementId;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 

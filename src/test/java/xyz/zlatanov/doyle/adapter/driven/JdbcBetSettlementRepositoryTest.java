@@ -8,20 +8,22 @@ import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.*;
-import xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus;
+import xyz.zlatanov.doyle.core.domain.id.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
-import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PAID_OUT;
-import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PENDING;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PAID_OUT;
+import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PENDING;
 
 @JdbcTest
-@Import({ JdbcBetSettlementRepository.class, JdbcBetRepository.class, UuidV7Service.class })
+@Import({JdbcBetSettlementRepository.class, JdbcBetRepository.class, UuidV7Service.class})
 class JdbcBetSettlementRepositoryTest {
 
     @Autowired

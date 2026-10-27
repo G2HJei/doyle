@@ -5,9 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.ConsumeEventOutcomeCommand;
-import xyz.zlatanov.doyle.core.domain.EventId;
-import xyz.zlatanov.doyle.core.domain.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.command.ConsumeEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
 import static java.util.UUID.randomUUID;

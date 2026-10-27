@@ -1,7 +1,11 @@
-package xyz.zlatanov.doyle.core.domain;
+package xyz.zlatanov.doyle.core.domain.command;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.EventMarketId;
+import xyz.zlatanov.doyle.core.domain.id.UserId;
 
 import java.math.BigDecimal;
 

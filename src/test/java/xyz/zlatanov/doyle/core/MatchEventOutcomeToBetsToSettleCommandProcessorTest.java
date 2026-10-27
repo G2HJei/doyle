@@ -7,12 +7,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.*;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.UserId;
+import xyz.zlatanov.doyle.core.domain.message.BetSettlementMessage;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementPublisher;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,13 +42,15 @@ class MatchEventOutcomeToBetsToSettleCommandProcessorTest {
 
     @BeforeEach
     void setUp() {
-        when(settlementJobRepository.nextPending()).thenReturn(settlementJob);
+        when(settlementJobRepository.nextPending()).thenReturn(Optional.of(settlementJob));
     }
 
     @Test
     void shouldDoNothingWhenNoPendingJobs() {
+        when(settlementJobRepository.nextPending()).thenReturn(Optional.empty());
         commandProcessor.match();
         verify(publisher, never()).publish(any());
+        verify(settlementJobRepository, never()).save(any());
     }
 
     @Test

@@ -10,7 +10,7 @@ import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import tools.jackson.databind.json.JsonMapper;
-import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
+import xyz.zlatanov.doyle.core.domain.message.BetSettlementMessage;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementPublisher;
 
 import static org.apache.rocketmq.client.producer.SendStatus.SEND_OK;

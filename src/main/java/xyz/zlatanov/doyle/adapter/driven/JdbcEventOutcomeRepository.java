@@ -6,16 +6,17 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.CompetitorId;
-import xyz.zlatanov.doyle.core.domain.EventId;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
-import xyz.zlatanov.doyle.core.domain.EventOutcomeId;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.EventOutcomeId;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static xyz.zlatanov.doyle.adapter.driven.CachingEventOutcomeLookup.EVENT_OUTCOMES_CACHE;
@@ -27,12 +28,11 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     private final UUIDService uuidService;
 
     @Override
-    public EventOutcome findOneByEventId(EventId eventId) {
+    public Optional<EventOutcome> findOneByEventId(EventId eventId) {
         return jdbcClient.sql("SELECT * FROM event_outcome WHERE event_id = :eventId")
                 .param("eventId", eventId.value())
                 .query(this::toEventOutcome)
-                .optional()
-                .orElse(null);
+                .optional();
     }
 
     @Override

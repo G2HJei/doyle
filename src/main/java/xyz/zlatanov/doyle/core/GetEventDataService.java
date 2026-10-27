@@ -2,7 +2,7 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
-import xyz.zlatanov.doyle.core.domain.EventId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
 import xyz.zlatanov.doyle.core.port.driven.EventDataRepository;
 import xyz.zlatanov.doyle.core.port.driving.GetEventDataUseCase;
 

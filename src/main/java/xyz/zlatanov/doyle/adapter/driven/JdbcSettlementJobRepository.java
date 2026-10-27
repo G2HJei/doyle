@@ -7,15 +7,16 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.BetId;
-import xyz.zlatanov.doyle.core.domain.EventId;
-import xyz.zlatanov.doyle.core.domain.SettlementJob;
-import xyz.zlatanov.doyle.core.domain.SettlementJobId;
+import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.SettlementJobId;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -35,7 +36,7 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
     }
 
     @Override
-    public SettlementJob nextPending() {
+    public Optional<SettlementJob> nextPending() {
         return jdbcClient.sql("""
                         SELECT * FROM settlement_job
                         WHERE completed = FALSE
@@ -44,8 +45,7 @@ public class JdbcSettlementJobRepository implements SettlementJobRepository {
                         FOR UPDATE SKIP LOCKED;
                         """)
                 .query(this::toSettlementJob)
-                .optional()
-                .orElse(null);
+                .optional();
     }
 
     private void insert(SettlementJob job) {

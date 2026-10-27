@@ -1,6 +1,6 @@
 package xyz.zlatanov.doyle.core.port.driving;
 
-import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
+import xyz.zlatanov.doyle.core.domain.command.SettleBetCommand;
 
 public interface SettleBetUseCase {
 

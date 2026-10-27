@@ -1,7 +1,7 @@
 package xyz.zlatanov.doyle.core.port.driving;
 
-import xyz.zlatanov.doyle.core.domain.BetId;
-import xyz.zlatanov.doyle.core.domain.SeedBetsCommand;
+import xyz.zlatanov.doyle.core.domain.command.SeedBetsCommand;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
 
 import java.util.List;
 

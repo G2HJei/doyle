@@ -3,7 +3,11 @@ package xyz.zlatanov.doyle.adapter.driving;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import xyz.zlatanov.doyle.core.domain.*;
+import xyz.zlatanov.doyle.core.domain.command.SeedBetsCommand;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.EventMarketId;
+import xyz.zlatanov.doyle.core.domain.id.UserId;
 
 import java.math.BigDecimal;
 import java.util.UUID;

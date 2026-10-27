@@ -7,18 +7,19 @@ import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import xyz.zlatanov.doyle.core.domain.CompetitorId;
-import xyz.zlatanov.doyle.core.domain.EventId;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
-@Import({ JdbcEventOutcomeRepository.class, UuidV7Service.class })
+@Import({JdbcEventOutcomeRepository.class, UuidV7Service.class})
 class JdbcEventOutcomeRepositoryTest {
 
     @Autowired
@@ -32,7 +33,7 @@ class JdbcEventOutcomeRepositoryTest {
 
         assertNotNull(outcome.id());
         assertEquals(1, outcome.version());
-        assertEquals(outcome, repository.findOneByEventId(outcome.eventId()));
+        assertEquals(Optional.of(outcome), repository.findOneByEventId(outcome.eventId()));
     }
 
     @Test
@@ -43,14 +44,14 @@ class JdbcEventOutcomeRepositoryTest {
         repository.save(outcome.eventWinnerId(new CompetitorId(randomUUID())));
 
         assertEquals(2, outcome.version());
-        assertEquals(outcome, repository.findOneByEventId(outcome.eventId()));
+        assertEquals(Optional.of(outcome), repository.findOneByEventId(outcome.eventId()));
     }
 
     @Test
     void shouldRejectStaleUpdate() {
         val outcome = outcome();
         repository.save(outcome);
-        val concurrentlyReadOutcome = repository.findOneByEventId(outcome.eventId());
+        val concurrentlyReadOutcome = repository.findOneByEventId(outcome.eventId()).orElseThrow();
         repository.save(outcome.eventWinnerId(new CompetitorId(randomUUID())));
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadOutcome));
@@ -65,8 +66,8 @@ class JdbcEventOutcomeRepositoryTest {
     }
 
     @Test
-    void shouldReturnNullForUnknownEvent() {
-        assertNull(repository.findOneByEventId(new EventId(randomUUID())));
+    void shouldReturnEmptyForUnknownEvent() {
+        assertEquals(Optional.empty(), repository.findOneByEventId(new EventId(randomUUID())));
     }
 
     @Test
@@ -90,7 +91,7 @@ class JdbcEventOutcomeRepositoryTest {
         repository.markPublished(List.of(outcome_1));
 
         assertEquals(List.of(outcome_2), repository.findUnpublished(10));
-        assertEquals(outcome_1.published(true), repository.findOneByEventId(outcome_1.eventId()));
+        assertEquals(Optional.of(outcome_1.published(true)), repository.findOneByEventId(outcome_1.eventId()));
     }
 
     @Test
@@ -98,7 +99,7 @@ class JdbcEventOutcomeRepositoryTest {
         val outcome_1 = outcome();
         val outcome_2 = outcome();
         List.of(outcome_1, outcome_2).forEach(repository::save);
-        val staleOutcome_2 = repository.findOneByEventId(outcome_2.eventId());
+        val staleOutcome_2 = repository.findOneByEventId(outcome_2.eventId()).orElseThrow();
         repository.save(outcome_2.eventWinnerId(new CompetitorId(randomUUID())));
 
         repository.markPublished(List.of(outcome_1, staleOutcome_2));

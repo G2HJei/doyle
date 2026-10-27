@@ -7,18 +7,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
-import xyz.zlatanov.doyle.core.domain.*;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.EventMarketId;
+import xyz.zlatanov.doyle.core.domain.id.UserId;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 
 @JdbcTest
-@Import({ JdbcSettlementJobRepository.class, JdbcBetRepository.class, UuidV7Service.class })
+@Import({JdbcSettlementJobRepository.class, JdbcBetRepository.class, UuidV7Service.class})
 class JdbcSettlementJobRepositoryTest {
 
     @Autowired
@@ -49,7 +55,7 @@ class JdbcSettlementJobRepositoryTest {
 
         assertNotNull(job.id());
         assertEquals(1, job.version());
-        assertEquals(job, repository.nextPending());
+        assertEquals(Optional.of(job), repository.nextPending());
     }
 
     @Test
@@ -62,7 +68,7 @@ class JdbcSettlementJobRepositoryTest {
 
         assertNull(repeatedJob.id());
         repository.save(job.completed(true));
-        assertNull(repository.nextPending());
+        assertEquals(Optional.empty(), repository.nextPending());
     }
 
     @Test
@@ -74,7 +80,7 @@ class JdbcSettlementJobRepositoryTest {
 
         repository.save(job.completed(true));
 
-        assertEquals(nextVersionJob, repository.nextPending());
+        assertEquals(Optional.of(nextVersionJob), repository.nextPending());
     }
 
     @Test
@@ -83,15 +89,15 @@ class JdbcSettlementJobRepositoryTest {
         jobs.forEach(repository::save);
 
         for (val job : jobs.stream().sorted(comparing(j -> j.id().value())).toList()) {
-            assertEquals(job, repository.nextPending());
+            assertEquals(Optional.of(job), repository.nextPending());
             repository.save(job.completed(true));
         }
-        assertNull(repository.nextPending());
+        assertEquals(Optional.empty(), repository.nextPending());
     }
 
     @Test
-    void shouldReturnNullWhenNoPendingJobs() {
-        assertNull(repository.nextPending());
+    void shouldReturnEmptyWhenNoPendingJobs() {
+        assertEquals(Optional.empty(), repository.nextPending());
     }
 
     @Test
@@ -102,14 +108,14 @@ class JdbcSettlementJobRepositoryTest {
         repository.save(job.lastBetId(bet.id()));
 
         assertEquals(2, job.version());
-        assertEquals(job, repository.nextPending());
+        assertEquals(Optional.of(job), repository.nextPending());
     }
 
     @Test
     void shouldRejectStaleUpdate() {
         val job = job(1);
         repository.save(job);
-        val concurrentlyReadJob = repository.nextPending();
+        val concurrentlyReadJob = repository.nextPending().orElseThrow();
         repository.save(job.lastBetId(bet.id()));
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadJob.completed(true)));

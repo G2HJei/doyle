@@ -1,6 +1,6 @@
 package xyz.zlatanov.doyle.core.port.driven;
 
-import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
+import xyz.zlatanov.doyle.core.domain.message.BetSettlementMessage;
 
 public interface BetSettlementPublisher {
 

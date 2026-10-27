@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import xyz.zlatanov.doyle.core.domain.BetId;
-import xyz.zlatanov.doyle.core.domain.EventId;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
 import xyz.zlatanov.doyle.core.port.driving.GetEventDataUseCase;
 import xyz.zlatanov.doyle.core.port.driving.SeedBetsUseCase;
 

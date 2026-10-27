@@ -8,9 +8,9 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.common.message.MessageExt;
 import tools.jackson.databind.json.JsonMapper;
-import xyz.zlatanov.doyle.core.domain.BetId;
-import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
-import xyz.zlatanov.doyle.core.domain.SettleBetCommand;
+import xyz.zlatanov.doyle.core.domain.command.SettleBetCommand;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
+import xyz.zlatanov.doyle.core.domain.message.BetSettlementMessage;
 import xyz.zlatanov.doyle.core.port.driving.SettleBetUseCase;
 
 import java.util.List;

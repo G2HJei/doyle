@@ -3,17 +3,23 @@ package xyz.zlatanov.doyle.core.domain;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import xyz.zlatanov.doyle.core.BetSettler;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
 
 import java.math.BigDecimal;
 
 import static java.math.BigDecimal.ONE;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.LOST;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.WON;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
-import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PENDING;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.LOST;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.WON;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.SETTLED;
+import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PENDING;
 
 class BetSettlerTest {
 

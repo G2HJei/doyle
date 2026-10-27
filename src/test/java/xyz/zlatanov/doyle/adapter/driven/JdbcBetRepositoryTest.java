@@ -6,20 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
-import xyz.zlatanov.doyle.core.domain.*;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.id.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.WON;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.WON;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.SETTLED;
 
 @JdbcTest
-@Import({ JdbcBetRepository.class, UuidV7Service.class })
+@Import({JdbcBetRepository.class, UuidV7Service.class})
 class JdbcBetRepositoryTest {
 
     @Autowired
@@ -35,7 +37,7 @@ class JdbcBetRepositoryTest {
 
         assertNotNull(bet.id());
         assertEquals(1, bet.version());
-        assertEquals(bet, repository.findById(bet.id()));
+        assertEquals(Optional.of(bet), repository.findById(bet.id()));
     }
 
     @Test
@@ -46,22 +48,22 @@ class JdbcBetRepositoryTest {
         repository.save(bet.status(SETTLED).result(WON).settledEventVersion(1));
 
         assertEquals(2, bet.version());
-        assertEquals(bet, repository.findById(bet.id()));
+        assertEquals(Optional.of(bet), repository.findById(bet.id()));
     }
 
     @Test
     void shouldRejectStaleUpdate() {
         val bet = bet(eventId);
         repository.save(bet);
-        val concurrentlyReadBet = repository.findById(bet.id());
+        val concurrentlyReadBet = repository.findById(bet.id()).orElseThrow();
         repository.save(bet.status(SETTLED).result(WON).settledEventVersion(1));
 
         assertThrows(OptimisticLockingFailureException.class, () -> repository.save(concurrentlyReadBet));
     }
 
     @Test
-    void shouldReturnNullForUnknownBet() {
-        assertNull(repository.findById(new BetId(randomUUID())));
+    void shouldReturnEmptyForUnknownBet() {
+        assertEquals(Optional.empty(), repository.findById(new BetId(randomUUID())));
     }
 
     @Test

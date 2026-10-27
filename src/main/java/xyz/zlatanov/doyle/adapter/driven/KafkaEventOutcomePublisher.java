@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.springframework.kafka.core.KafkaTemplate;
-import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
+import xyz.zlatanov.doyle.core.domain.message.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 
 import static java.util.concurrent.TimeUnit.SECONDS;

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.BetSettlementMessage;
-import xyz.zlatanov.doyle.core.domain.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.message.BetSettlementMessage;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.BetSettlementPublisher;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
@@ -27,10 +27,10 @@ public class MatchEventOutcomeToBetsToSettleCommandProcessor implements MatchEve
     @Transactional
     @Override
     public void match() {
-        val job = settlementJobRepository.nextPending();
-        if (job == null) {
-            return;
-        }
+        settlementJobRepository.nextPending().ifPresent(this::match);
+    }
+
+    private void match(SettlementJob job) {
         val bets = getBetsToSettle(job);
         if (bets.isEmpty()) {
             completeJob(job);

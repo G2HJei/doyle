@@ -6,7 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.*;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+import xyz.zlatanov.doyle.core.domain.id.EventOutcomeId;
+import xyz.zlatanov.doyle.core.domain.message.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 

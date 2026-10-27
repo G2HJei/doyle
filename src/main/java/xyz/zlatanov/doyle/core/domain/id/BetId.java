@@ -1,11 +1,11 @@
-package xyz.zlatanov.doyle.core.domain;
+package xyz.zlatanov.doyle.core.domain.id;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public record EventMarketId(UUID value) {
+public record BetId(UUID value) {
 
-    public EventMarketId {
+    public BetId {
         Objects.requireNonNull(value);
     }
 

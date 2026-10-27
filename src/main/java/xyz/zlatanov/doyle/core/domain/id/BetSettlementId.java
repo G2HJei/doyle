@@ -1,11 +1,11 @@
-package xyz.zlatanov.doyle.core.domain;
+package xyz.zlatanov.doyle.core.domain.id;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public record SettlementJobId(UUID value) {
+public record BetSettlementId(UUID value) {
 
-    public SettlementJobId {
+    public BetSettlementId {
         Objects.requireNonNull(value);
     }
 

@@ -1,6 +1,6 @@
 package xyz.zlatanov.doyle.core.port.driven;
 
-import xyz.zlatanov.doyle.core.domain.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
 
 public interface BetSettlementRepository {
 

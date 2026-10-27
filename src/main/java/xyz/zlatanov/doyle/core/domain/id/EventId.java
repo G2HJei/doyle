@@ -1,11 +1,11 @@
-package xyz.zlatanov.doyle.core.domain;
+package xyz.zlatanov.doyle.core.domain.id;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public record UserId(UUID value) {
+public record EventId(UUID value) {
 
-    public UserId {
+    public EventId {
         Objects.requireNonNull(value);
     }
 

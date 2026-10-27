@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
-import xyz.zlatanov.doyle.core.domain.ConsumeEventOutcomeCommand;
-import xyz.zlatanov.doyle.core.domain.SettlementJob;
+import xyz.zlatanov.doyle.core.domain.command.ConsumeEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.entity.SettlementJob;
 import xyz.zlatanov.doyle.core.port.driven.SettlementJobRepository;
 import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
 

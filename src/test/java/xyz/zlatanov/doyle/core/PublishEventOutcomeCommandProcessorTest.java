@@ -5,12 +5,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import xyz.zlatanov.doyle.core.domain.CompetitorId;
-import xyz.zlatanov.doyle.core.domain.EventId;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
-import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.command.PublishEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.id.CompetitorId;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 
+import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
@@ -38,7 +39,7 @@ class PublishEventOutcomeCommandProcessorTest {
     @Test
     void shouldPublishUpdatedEventOutcome() {
         when(repository.findOneByEventId(command.eventId()))
-                .thenReturn(eventOutcome(1, new CompetitorId(randomUUID())));
+                .thenReturn(Optional.of(eventOutcome(1, new CompetitorId(randomUUID()))));
         service.publish(command);
         verify(repository).save(eventOutcome(1));
     }
@@ -46,7 +47,7 @@ class PublishEventOutcomeCommandProcessorTest {
     @Test
     void shouldNotPublishUnchangedEventOutcome() {
         when(repository.findOneByEventId(command.eventId()))
-                .thenReturn(eventOutcome(1, new CompetitorId(randomUUID())));
+                .thenReturn(Optional.of(eventOutcome(1, new CompetitorId(randomUUID()))));
         service.publish(command);
 
         service.publish(command);

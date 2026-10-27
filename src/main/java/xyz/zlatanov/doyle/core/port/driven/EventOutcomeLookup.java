@@ -1,9 +1,11 @@
 package xyz.zlatanov.doyle.core.port.driven;
 
-import xyz.zlatanov.doyle.core.domain.EventId;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.id.EventId;
+
+import java.util.Optional;
 
 public interface EventOutcomeLookup {
 
-    EventOutcome findOneByEventId(EventId eventId);
+    Optional<EventOutcome> findOneByEventId(EventId eventId);
 }

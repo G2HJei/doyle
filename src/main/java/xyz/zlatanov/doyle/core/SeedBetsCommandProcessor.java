@@ -2,17 +2,17 @@ package xyz.zlatanov.doyle.core;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.BetId;
-import xyz.zlatanov.doyle.core.domain.SeedBetsCommand;
-import xyz.zlatanov.doyle.core.domain.SeedBetsCommand.BetTemplate;
+import xyz.zlatanov.doyle.core.domain.command.SeedBetsCommand;
+import xyz.zlatanov.doyle.core.domain.command.SeedBetsCommand.BetTemplate;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.id.BetId;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driving.SeedBetsUseCase;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
 
 @RequiredArgsConstructor
 public class SeedBetsCommandProcessor implements SeedBetsUseCase {

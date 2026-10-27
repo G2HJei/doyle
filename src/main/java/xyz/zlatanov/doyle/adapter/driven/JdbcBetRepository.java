@@ -5,15 +5,17 @@ import lombok.val;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import xyz.zlatanov.doyle.core.domain.*;
-import xyz.zlatanov.doyle.core.domain.Bet.BetResult;
-import xyz.zlatanov.doyle.core.domain.Bet.BetStatus;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult;
+import xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus;
+import xyz.zlatanov.doyle.core.domain.id.*;
 import xyz.zlatanov.doyle.core.port.driven.BetRepository;
 import xyz.zlatanov.doyle.core.port.driven.UUIDService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -38,12 +40,11 @@ public class JdbcBetRepository implements BetRepository {
     }
 
     @Override
-    public Bet findById(BetId id) {
+    public Optional<Bet> findById(BetId id) {
         return jdbcClient.sql("SELECT * FROM bet WHERE id = :id")
                 .param("id", id.value())
                 .query(this::toBet)
-                .optional()
-                .orElse(null);
+                .optional();
     }
 
     @Override

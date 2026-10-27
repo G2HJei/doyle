@@ -14,7 +14,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.ExponentialBackOff;
 import xyz.zlatanov.doyle.adapter.driven.KafkaEventOutcomePublisher;
 import xyz.zlatanov.doyle.adapter.driving.KafkaEventOutcomeListener;
-import xyz.zlatanov.doyle.core.domain.EventOutcomeMessage;
+import xyz.zlatanov.doyle.core.domain.message.EventOutcomeMessage;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomePublisher;
 import xyz.zlatanov.doyle.core.port.driving.ConsumeEventOutcomeUseCase;
 

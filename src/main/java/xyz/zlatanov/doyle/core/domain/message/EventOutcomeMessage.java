@@ -1,4 +1,6 @@
-package xyz.zlatanov.doyle.core.domain;
+package xyz.zlatanov.doyle.core.domain.message;
+
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
 
 import java.util.UUID;
 

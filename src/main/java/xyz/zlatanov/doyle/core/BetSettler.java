@@ -1,18 +1,18 @@
 package xyz.zlatanov.doyle.core;
 
-import xyz.zlatanov.doyle.core.domain.Bet;
-import xyz.zlatanov.doyle.core.domain.Bet.BetResult;
-import xyz.zlatanov.doyle.core.domain.BetSettlement;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
+import xyz.zlatanov.doyle.core.domain.entity.Bet;
+import xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult;
+import xyz.zlatanov.doyle.core.domain.entity.BetSettlement;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.LOST;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetResult.WON;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.PLACED;
-import static xyz.zlatanov.doyle.core.domain.Bet.BetStatus.SETTLED;
-import static xyz.zlatanov.doyle.core.domain.BetSettlement.PayoutStatus.PENDING;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.LOST;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetResult.WON;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.PLACED;
+import static xyz.zlatanov.doyle.core.domain.entity.Bet.BetStatus.SETTLED;
+import static xyz.zlatanov.doyle.core.domain.entity.BetSettlement.PayoutStatus.PENDING;
 
 public class BetSettler {
 

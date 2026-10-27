@@ -4,12 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
-import xyz.zlatanov.doyle.core.domain.EventOutcome;
-import xyz.zlatanov.doyle.core.domain.PublishEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.command.PublishEventOutcomeCommand;
+import xyz.zlatanov.doyle.core.domain.entity.EventOutcome;
 import xyz.zlatanov.doyle.core.port.driven.EventOutcomeRepository;
 import xyz.zlatanov.doyle.core.port.driving.PublishEventOutcomeUseCase;
-
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,7 +18,7 @@ public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeU
     @Transactional
     @Override
     public void publish(PublishEventOutcomeCommand command) {
-        val eventOutcome = Optional.ofNullable(repository.findOneByEventId(command.eventId()))
+        val eventOutcome = repository.findOneByEventId(command.eventId())
                 .orElseGet(EventOutcome::new);
         if (outcomeChanged(command, eventOutcome)) {
             eventOutcome.eventId(command.eventId())
