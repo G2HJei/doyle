@@ -20,6 +20,7 @@ public class JdbcEventOutcomeRepository implements EventOutcomeRepository {
     private final JdbcClient  jdbcClient;
     private final UUIDService uuidService;
 
+    //todo cache?
     @Override
     public EventOutcome findOneByEventId(UUID eventId) {
         return jdbcClient.sql("SELECT * FROM event_outcome WHERE event_id = :eventId")

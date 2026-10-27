@@ -1,0 +1,38 @@
+services:
+  kafka:
+    image: apache/kafka:4.4.0
+    ports:
+      - "9092:9092"
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.5.0
+    command: sh mqnamesrv
+    environment:
+      JAVA_OPT_EXT: "-Xms256m -Xmx256m"
+    ports:
+      - "9876:9876"
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.5.0
+    command: sh mqbroker -c /home/rocketmq/broker.conf
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
+    volumes:
+      - ./rocketmq/broker.conf:/home/rocketmq/broker.conf:ro
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    depends_on:
+      - rocketmq-namesrv
+
+  # pre-creates the topic: when auto-created by the first send, consumers only see it after their next route refresh
+  # (up to ~1 min); mqadmin exits 0 on failure, so retry until the broker has registered and the create succeeds.
+  # Shares the broker's network so the advertised 127.0.0.1 broker address resolves to the broker.
+  rocketmq-init:
+    image: apache/rocketmq:5.5.0
+    command: sh -c 'until sh mqadmin updateTopic -n rocketmq-namesrv:9876 -c DefaultCluster -t bet-settlements | grep -q success; do sleep 2; done'
+    network_mode: service:rocketmq-broker
+    depends_on:
+      - rocketmq-broker
