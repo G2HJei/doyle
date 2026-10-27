@@ -37,21 +37,28 @@ class SettleBetCommandProcessorTest {
     @InjectMocks
     SettleBetCommandProcessor commandProcessor;
 
-    EventOutcome outcome    = new EventOutcome()
+    EventOutcome outcome           = new EventOutcome()
             .eventId(UUID.randomUUID())
             .eventWinnerId(UUID.randomUUID())
             .version(1);
-    Bet          losingBet  = new Bet()
+    Bet          losingBet         = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(UUID.randomUUID()) //not the winner
             .status(PLACED);
-    Bet          winningBet = new Bet()
+    Bet          winningBet        = new Bet()
             .id(UUID.randomUUID())
             .eventId(outcome.eventId())
             .eventWinnerId(outcome.eventWinnerId())
             .amount(ONE)
             .status(PLACED);
+    Bet          settledWinningBet = new Bet()
+            .id(UUID.randomUUID())
+            .eventId(outcome.eventId())
+            .eventWinnerId(outcome.eventWinnerId())
+            .amount(ONE)
+            .status(SETTLED)
+            .settledEventVersion(1);
 
     @BeforeEach
     void setUp() {
@@ -80,5 +87,12 @@ class SettleBetCommandProcessorTest {
                 .settledEventVersion(1)
                 .deltaAmount(ONE)
                 .payoutStatus(PENDING));
+    }
+
+    @Test
+    void shouldNoOpAlreadySettledBet() {
+        when(betRepository.findById(settledWinningBet.id())).thenReturn(settledWinningBet);
+        commandProcessor.settle(new SettleBetCommand().betId(settledWinningBet.id()));
+        verifyNoInteractions(betRepository, betSettlementRepository);
     }
 }
