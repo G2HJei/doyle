@@ -72,8 +72,8 @@ at [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index
 +-----------------------------+
 ```
 
-Event outcome REST API stores the event outcome optimistically in an outbox, letting caller know in case of failure to
-acquire optimistic lock.
+Event outcome REST API stores the event outcome optimistically in an outbox, answering `409 Conflict` in case of failure
+to acquire optimistic lock. Errors are RFC 9457 problem details, invalid fields listed in `errors`.
 
 Event outcome relay polls for unpublished event outcomes every second. Pessimistically locks outcomes and publishes to
 `event-outcomes` with `event id` _partition key_ and `event id` + `outcome version` _idempotency key_.

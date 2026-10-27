@@ -21,13 +21,20 @@ public class PublishEventOutcomeCommandProcessor implements PublishEventOutcomeU
     @Override
     public void publish(PublishEventOutcomeCommand command) {
         val eventOutcome = Optional.ofNullable(repository.findOneByEventId(command.eventId()))
-                .orElseGet(EventOutcome::new)
-                .eventId(command.eventId())
-                .eventName(command.eventName())
-                .eventWinnerId(command.eventWinnerId())
-                .published(false);
-        repository.save(eventOutcome);
-        log.info("Event outcome saved: eventId={}, outcomeVersion={}, winnerId={}",
-                eventOutcome.eventId(), eventOutcome.version(), eventOutcome.eventWinnerId());
+                .orElseGet(EventOutcome::new);
+        if (outcomeChanged(command, eventOutcome)) {
+            eventOutcome.eventId(command.eventId())
+                    .eventName(command.eventName())
+                    .eventWinnerId(command.eventWinnerId())
+                    .published(false);
+            repository.save(eventOutcome);
+            log.info("Event outcome saved: eventId={}, outcomeVersion={}, winnerId={}",
+                    eventOutcome.eventId(), eventOutcome.version(), eventOutcome.eventWinnerId());
+        }
+    }
+
+    private boolean outcomeChanged(PublishEventOutcomeCommand command, EventOutcome eventOutcome) {
+        return !command.eventName().equals(eventOutcome.eventName())
+                || !command.eventWinnerId().equals(eventOutcome.eventWinnerId());
     }
 }

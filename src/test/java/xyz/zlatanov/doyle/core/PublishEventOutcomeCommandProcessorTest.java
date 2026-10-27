@@ -41,6 +41,17 @@ class PublishEventOutcomeCommandProcessorTest {
         verify(repository).save(eventOutcome(1));
     }
 
+    @Test
+    void shouldNotPublishUnchangedEventOutcome() {
+        when(repository.findOneByEventId(command.eventId()))
+                .thenReturn(eventOutcome(1, UUID.randomUUID()));
+        service.publish(command);
+
+        service.publish(command);
+
+        verify(repository).save(eventOutcome(1));
+    }
+
     EventOutcome eventOutcome(Integer version) {
         return eventOutcome(version, command.eventWinnerId());
     }
